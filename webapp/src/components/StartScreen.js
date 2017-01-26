@@ -45,6 +45,10 @@ export default class StartScreen extends Component {
                                   primary={true}
                                   disabled={!this.state.username}
                                   onClick={this.onCreateGame}
+                                  onKeyPress={(e)=>  {
+                                      if (e.key === 'Enter')
+                                          this.onCreateGame()
+                                  }}
                     />
                 </div>
             </div>
