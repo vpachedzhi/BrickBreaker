@@ -14,24 +14,24 @@ export default class StartScreen extends Component {
         roomsList: []
     }
 
-    constructor() {
-        super()
-        this.socket = io()
-        this.socket.on('rooms_list_update', (roomsList) => {
+    static propTypes = {
+        socket: React.PropTypes.any
+    }
+
+    constructor(props) {
+        super(props)
+        this.props.socket.on('rooms_list_update', (roomsList) => {
             this.setState({roomsList})
         })
     }
 
-    componentWillUnmount() {
-        this.socket.close()
-    }
-
     onCreateGame = () => {
+        this.props.socket.off('rooms_list_update')
         hashHistory.push(`/game/${this.state.username}`)
     }
 
     onJoinGame = (roomId) => {
-        this.socket.emit('join_game', {roomId, name: this.state.username})
+        this.props.socket.emit('join_game', {roomId, name: this.state.username})
     }
 
     render() {
