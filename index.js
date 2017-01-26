@@ -5,7 +5,7 @@ const app = express()
 app.use(express.static(path.join(__dirname, 'webapp')))
 
 const server = app.listen(3000, function () {
-    console.log('Chat app listening on port 3000!')
+    console.log('App listening on port 3000!')
 })
 
 const io = require('socket.io')(server)
@@ -22,35 +22,32 @@ io.on('connection', function(socket){
             socket: socket.join(roomId, () => {
                 socket.emit('new_game', roomId)
             }),
-            hostName: data.name
+            hostname: data.name
         }
 
-        io.emit('rooms_list_update', Object.keys(rooms).map(key => {
-            return {
-                hostName: rooms[key].hostName,
-                roomId: key
-            }
-        }))
+        notifyUpdate()
     })
 
-    io.emit('rooms_list_update', Object.keys(rooms).map(key => {
-        return {
-            hostName: rooms[key].hostName,
-            roomId: key
-        }
-    }))
+    notifyUpdate()
 
     socket.on('join_game', (data) => {
         rooms[data.roomId].socket.emit('user_joined', data.name)
     })
 
     socket.on('disconnect', function () {
-
-        //socket.emit('disconnected');
         console.log('user disconected')
     });
 
 })
+
+const notifyUpdate = () => {
+    io.emit('rooms_list_update', Object.keys(rooms).map(key => {
+        return {
+            hostname: rooms[key].hostname,
+            roomId: key
+        }
+    }))
+}
 
 
 
