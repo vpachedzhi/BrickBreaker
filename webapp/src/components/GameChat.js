@@ -41,8 +41,8 @@ export default class GameChat extends Component {
 
     render() {
 
-       return (<Paper style={{padding: '1%'}}>
-           <div className="row">
+       return (<Paper style={{padding: '1%'}} className="GameChat">
+           <div className="row" style={{height: '60%'}}>
                <div className="ChatContainer col-md-12 col-sm-12"
                     ref="chat_container"
                >
@@ -62,7 +62,7 @@ export default class GameChat extends Component {
                    </List>
                </div>
            </div>
-           <div className="row">
+           <div className="row" style={{height: '40%'}}>
                <div className="col-md-10 col-sm-10">
                    <TextField
                        hintText="Write your message..."

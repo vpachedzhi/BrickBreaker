@@ -1,6 +1,5 @@
 body {
     margin: 0;
-    max-width: 100%;
     overflow-x: hidden;
 }
 
@@ -19,9 +18,29 @@ body {
 }
 
 .ChatContainer {
-    height: 100px;
+    height: 100%;
     overflow-y: scroll;
     word-wrap: break-word;
+}
+
+.HistoryContainer {
+    overflow-y: scroll;
+    word-wrap: break-word;
+}
+
+
+.GameScreen {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+.GameChat {
+    height: 20%;
+}
+
+.GameField {
+    height: 80%;
 }
 
 /* Below CSS is for vertical scrollbars */

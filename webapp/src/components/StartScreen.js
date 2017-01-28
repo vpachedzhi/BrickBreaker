@@ -26,14 +26,14 @@ export default class StartScreen extends Component {
     }
 
     onCreateGame = () => {
-        if(!this.state.username) {
+        if(this.state.username) {
             this.props.socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/host/room`)
         }
     }
 
     onJoinGame = (game) => {
-        if(!this.state.username) {
+        if(this.state.username) {
             this.props.socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/guest/${game.roomId}`)
         }
