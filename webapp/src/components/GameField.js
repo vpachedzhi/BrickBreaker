@@ -15,6 +15,8 @@ export default class GameField extends Component {
     }
 
     componentDidMount() {
+        this.refs.canvas.height = this.refs.gameContainer.clientHeight
+        this.refs.canvas.width = this.refs.gameContainer.clientWidth
         this.startDraw()
     }
 
@@ -41,13 +43,13 @@ export default class GameField extends Component {
     }
 
     startDraw = () => {
-        const canvas = this.refs.field,
+        const canvas = this.refs.canvas,
             ctx = canvas.getContext('2d')
         const ballRadius = 10
-        let x = parseInt(this.styles.ballArea.width)/2,
-            y = parseInt(this.styles.ballArea.height)-30,
-            dx = 2,
-            dy = -2
+        let x = canvas.width/2,
+            y = canvas.height-30,
+            dx = 10,
+            dy = -dx
         const drawBall = () => {
                 ctx.beginPath();
                 ctx.arc(x, y, ballRadius, 0, Math.PI*2);
@@ -56,7 +58,6 @@ export default class GameField extends Component {
                 ctx.closePath();
             },
             draw = () => {
-
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
                 drawBall();
 
@@ -73,12 +74,16 @@ export default class GameField extends Component {
         setInterval(draw, 10);
     }
 
+
+
     render() {
         const {container, leftPad, ballArea} = this.styles
         return <div className="GameField">
-            <div className="GameContainer" style={container}>
-                <canvas ref="leftPad" width={leftPad.width} height={leftPad.height}/>
-                <canvas ref="field" width={ballArea.width} height={ballArea.height}/>
+            <div className="GameContainer"
+                 ref="gameContainer"
+                 onMouseMove={e => console.log(e.clientY)}>
+                {/*<canvas ref="leftPad" width={leftPad.width} height={leftPad.height}/>*/}
+                <canvas ref="canvas"/>
                 {/*<canvas ref="rightPad"/>*/}
             </div>
         </div>
