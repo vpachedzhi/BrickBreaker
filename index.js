@@ -10,12 +10,12 @@ const server = app.listen(3000, function () {
 
 const io = require('socket.io')(server)
 
-var room = 0
-var rooms = {}
+let room = 0
+let rooms = {}
 
 io.on('connection', function(socket){
     socket.on('create_game', (data) => {
-        var roomId = 'room' + room++
+        const roomId = 'room' + room++
         console.log(data.name + ' created room: ' + roomId)
         socket.join(roomId)
         socket.emit('new_game_created', roomId)
@@ -23,6 +23,11 @@ io.on('connection', function(socket){
             socket: socket,
             hostname: data.name
         }
+
+        socket.on('disconnect', () => {
+            delete rooms[roomId]
+            notifyUpdate()
+        })
 
         notifyUpdate()
     })
@@ -39,10 +44,6 @@ io.on('connection', function(socket){
         socket.emit('send_to_room', data)
         console.log(`${data.author}: ${data.message} in ${data.roomId}`)
     })
-
-    socket.on('disconnect', function () {
-        console.log('user disconected')
-    });
 
 })
 
