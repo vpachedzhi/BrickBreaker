@@ -42,6 +42,8 @@ export default class GameScreen extends Component {
     }
 
     render() {
-        return <div><GameChat onSendMessage={this.onSendMessage} newMessage={this.state.newMessage}/></div>
+        return <div><GameChat onSendMessage={this.onSendMessage}
+                              newMessage={this.state.newMessage}
+                              name={this.props.params.name}/></div>
     }
 }

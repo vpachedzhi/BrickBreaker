@@ -26,13 +26,17 @@ export default class StartScreen extends Component {
     }
 
     onCreateGame = () => {
-        this.props.socket.off('rooms_list_update')
-        hashHistory.push(`/game/${this.state.username}/host/room`)
+        if(!this.state.username) {
+            this.props.socket.off('rooms_list_update')
+            hashHistory.push(`/game/${this.state.username}/host/room`)
+        }
     }
 
     onJoinGame = (game) => {
-        this.props.socket.off('rooms_list_update')
-        hashHistory.push(`/game/${this.state.username}/guest/${game.roomId}`)
+        if(!this.state.username) {
+            this.props.socket.off('rooms_list_update')
+            hashHistory.push(`/game/${this.state.username}/guest/${game.roomId}`)
+        }
     }
 
     render() {

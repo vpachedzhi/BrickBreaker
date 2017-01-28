@@ -13,7 +13,8 @@ export default class GameChat extends Component {
 
     static propTypes = {
         newMessage: React.PropTypes.object.isRequired,
-        onSendMessage: React.PropTypes.func.isRequired
+        onSendMessage: React.PropTypes.func.isRequired,
+        isHost: React.PropTypes.bool
     }
 
     scrollToBottom = () => {
@@ -39,16 +40,23 @@ export default class GameChat extends Component {
     }
 
     render() {
+
        return (<Paper style={{padding: '1%'}}>
            <div className="row">
-               <div className="col-md-12 col-sm-12"
-                    style={{height: '100px', overflowY: 'scroll', wordWrap: 'break-word'}}
+               <div className="ChatContainer col-md-12 col-sm-12"
                     ref="chat_container"
                >
                    <List>
                        {this.state.history.map((data, i) => {
+                           const isAuthor = this.props.name === data.author
                            return <ListItem key={i}
-                                            primaryText={`${data.author}: ${data.message}`}
+                                            primaryText={
+                                                <p className={isAuthor ? 'HostMsg' : 'GuestMsg'}>
+                                                    <b>{data.author}: </b>{data.message}
+                                                </p>
+                                            }
+                                            style={{textAlign:  isAuthor ? 'left' : 'right'}}
+                                            innerDivStyle={{padding: '0px', borderRadius: '5px'}}
                            />
                        } )}
                    </List>

@@ -4,9 +4,31 @@ body {
     overflow-x: hidden;
 }
 
+.HostMsg {
+    padding: 3px;
+    margin: 1px;
+    border-radius: 5px;
+    background-color: rgba(0, 151, 167, 0.2);
+}
+
+.GuestMsg {
+    padding: 3px;
+    margin: 1px;
+    border-radius: 5px;
+    background-color: rgba(0, 188, 212, 0.2);
+}
+
+.ChatContainer {
+    height: 100px;
+    overflow-y: scroll;
+    word-wrap: break-word;
+}
+
+/* Below CSS is for vertical scrollbars */
+
 ::-webkit-scrollbar
 {
-    width: 22px;  /* for vertical scrollbars */
+    width: 22px;
 }
 
 ::-webkit-scrollbar-track {
