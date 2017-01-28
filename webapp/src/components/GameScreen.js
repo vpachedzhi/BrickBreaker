@@ -36,7 +36,7 @@ export default class GameScreen extends Component {
     }
 
     onReceiveMessage = (data) => {
-        this.setState({message: data})
+        this.setState({newMessage: data})
     }
 
     render() {
