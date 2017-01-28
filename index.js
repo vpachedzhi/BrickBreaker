@@ -17,11 +17,10 @@ io.on('connection', function(socket){
     socket.on('create_game', (data) => {
         var roomId = 'room' + room++
         console.log(data.name + ' created room: ' + roomId)
-
+        socket.join(roomId)
+        socket.emit('new_game_created', roomId)
         rooms[roomId] = {
-            socket: socket.join(roomId, () => {
-                socket.emit('new_game_created', roomId)
-            }),
+            socket: socket,
             hostname: data.name
         }
 
@@ -31,7 +30,14 @@ io.on('connection', function(socket){
     notifyUpdate()
 
     socket.on('join_game', (data) => {
+        socket.join(data.roomId);
         rooms[data.roomId].socket.emit('user_joined', data.name)
+    })
+
+    socket.on('message_sent', (data) => {
+        socket.broadcast.to(data.roomId).emit('send_to_room', data)
+        socket.emit('send_to_room', data)
+        console.log(`${data.author}: ${data.message} in ${data.roomId}`)
     })
 
     socket.on('disconnect', function () {

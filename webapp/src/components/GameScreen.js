@@ -9,7 +9,7 @@ export default class GameScreen extends Component {
 
     state = {
         roomId: '',
-        newMessage: null
+        newMessage: {}
     }
 
     constructor(props) {
@@ -24,15 +24,17 @@ export default class GameScreen extends Component {
                 console.log(userName + ' has joined your room')
             })
         } else {
-            this.props.socket.emit('join_game', {roomId: this.props.params.roomId, name: this.props.params.name})
-            console.log(this.props.params.name + ', you joined ' + this.props.params.roomId)
+            const {roomId, name} = this.props.params
+            this.props.socket.emit('join_game', {roomId, name})
+            console.log(name + ', you joined ' + roomId)
+            this.state.roomId = roomId
         }
-        this.props.socket.on('message_sent', this.onReceiveMessage)
+        this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
     }
 
     onSendMessage = (message) => {
         console.log(`You sent: ${message}`)
-        this.props.socket.to(this.state.roomId).emit('message_sent', {message, name: this.props.params.name})
+        this.props.socket.emit('message_sent', {message, author: this.props.params.name, roomId: this.state.roomId})
     }
 
     onReceiveMessage = (data) => {

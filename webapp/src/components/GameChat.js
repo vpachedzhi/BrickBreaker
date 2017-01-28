@@ -32,8 +32,8 @@ export default class GameChat extends Component {
     }
 
     componentWillReceiveProps(nextProps) {
-        if(nextProps.newMessage) {
-            this.setState({history: [...history, nextProps.newMessage]})
+        if(Object.keys(nextProps.newMessage).length != 0) {
+            this.setState({history: [...this.state.history, nextProps.newMessage]})
             setTimeout(this.scrollToBottom, 0)
         }
     }
@@ -46,9 +46,9 @@ export default class GameChat extends Component {
                     ref="chat_container"
                >
                    <List>
-                       {this.history.map((data, i) => {
+                       {this.state.history.map((data, i) => {
                            return <ListItem key={i}
-                                            primaryText={`${data.name}: ${data.message}`}
+                                            primaryText={`${data.author}: ${data.message}`}
                            />
                        } )}
                    </List>
