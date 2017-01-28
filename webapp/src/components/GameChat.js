@@ -51,12 +51,12 @@ export default class GameChat extends Component {
                            const isAuthor = this.props.name === data.author
                            return <ListItem key={i}
                                             primaryText={
-                                                <p className={isAuthor ? 'HostMsg' : 'GuestMsg'}>
-                                                    <b>{data.author}: </b>{data.message}
-                                                </p>
+                                                <span className={isAuthor ? 'HostMsg' : 'GuestMsg'}>
+                                                    {data.message}
+                                                </span>
                                             }
-                                            style={{textAlign:  isAuthor ? 'left' : 'right'}}
-                                            innerDivStyle={{padding: '0px', borderRadius: '5px'}}
+                                            style={{textAlign:  isAuthor ? 'right' : 'left'}}
+                                            innerDivStyle={{padding: '6px', borderRadius: '5px'}}
                            />
                        } )}
                    </List>

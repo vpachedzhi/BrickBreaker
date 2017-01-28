@@ -24,6 +24,9 @@ export default class GameScreen extends Component {
             this.props.socket.on('user_joined', (userName) => {
                 console.log(userName + ' has joined your room')
             })
+            this.props.socket.on('disconnect', () => {
+                this.props.socket.emit('host_disconnected', this.state.roomId)
+            })
         } else {
             const {roomId, name} = this.props.params
             this.props.socket.emit('join_game', {roomId, name})

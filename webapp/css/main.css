@@ -4,17 +4,17 @@ body {
 }
 
 .HostMsg {
-    padding: 3px;
-    margin: 1px;
-    border-radius: 5px;
+    padding: 4px;
+    margin: 3px;
+    border-radius: 7px;
     background-color: rgba(0, 151, 167, 0.2);
 }
 
 .GuestMsg {
-    padding: 3px;
-    margin: 1px;
-    border-radius: 5px;
-    background-color: rgba(0, 188, 212, 0.2);
+    padding: 4px;
+    margin: 3px;
+    border-radius: 7px;
+    background-color: rgba(206, 57, 107, 0.2);
 }
 
 .ChatContainer {
