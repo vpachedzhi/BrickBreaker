@@ -9,7 +9,7 @@ export default class GameScreen extends Component {
 
     state = {
         roomId: '',
-        newMessage: {}
+        newMessage: null
     }
 
     constructor(props) {
