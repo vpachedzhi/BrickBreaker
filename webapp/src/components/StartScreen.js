@@ -11,7 +11,8 @@ export default class StartScreen extends Component {
     state = {
         username: '',
         roomId: '',
-        roomsList: []
+        roomsList: [],
+        errorText: ''
     }
 
     static propTypes = {
@@ -29,6 +30,8 @@ export default class StartScreen extends Component {
         if(this.state.username) {
             this.props.socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/host/room`)
+        } else {
+            this.displayErrorText();
         }
     }
 
@@ -36,16 +39,27 @@ export default class StartScreen extends Component {
         if(this.state.username) {
             this.props.socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/guest/${game.roomId}`)
+        } else {
+            this.displayErrorText();
         }
     }
 
+    displayErrorText() {
+        this.setState({errorText: "Please enter your name first"})
+    }
+
+    onTextChange(text) {
+        this.setState({username: text, errorText: ''})
+    }
+
     render() {
-        return <Paper>
+        return <Paper className="StartScreen">
             <div className="row">
                 <div className="col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
                     <TextField hintText="Enter username"
                                value={this.state.username}
-                               onChange={(e) => this.setState({username: e.target.value})}
+                               onChange={(e) => this.onTextChange(e.target.value)}
+                               errorText={this.state.errorText}
                                onKeyPress={(e)=>  {
                                    if (e.key === 'Enter')
                                        this.onCreateGame()
@@ -55,6 +69,7 @@ export default class StartScreen extends Component {
                                   primary={true}
                                   disabled={!this.state.username}
                                   onClick={this.onCreateGame}
+                                  style={{position: 'absolute'}}
                     />
                 </div>
             </div>

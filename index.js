@@ -36,7 +36,8 @@ io.on('connection', function(socket){
 
     socket.on('join_game', (data) => {
         socket.join(data.roomId);
-        rooms[data.roomId].socket.emit('user_joined', data.name)
+        rooms[data.roomId].socket.emit('opponent_joined', data.name)
+        socket.emit('opponent_joined', rooms[data.roomId].hostname)
     })
 
     socket.on('message_sent', (data) => {
