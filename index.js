@@ -20,7 +20,7 @@ io.on('connection', function(socket){
 
         rooms[roomId] = {
             socket: socket.join(roomId, () => {
-                socket.emit('new_game', roomId)
+                socket.emit('new_game_created', roomId)
             }),
             hostname: data.name
         }
@@ -48,20 +48,3 @@ const notifyUpdate = () => {
         }
     }))
 }
-
-
-
-
-
-//chat.emit('message', {message: 'hiihihihih'})
-
-//chat.on('message', (data) => console.log(data))
-
-// io.on('connection', (socket) => {
-//     console.log('a user connected')
-//     socket.emit('message', {message:'you just connected mofo!'})
-//     socket.on('disconnect', () => {
-//         console.log('user disconnected')
-//     })
-//     socket.on('message', (data) => console.log(data.message))
-// })
