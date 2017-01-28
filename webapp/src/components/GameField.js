@@ -14,19 +14,21 @@ export default class GameField extends Component {
         super(props)
     }
 
-    style = {
+    styles = {
         container: {
-            width: '100%',
-            height: '80%'
+            width: '1100px',
+            height: '650px'
         }
     }
 
     render() {
-        const {container} = this.style
-        return <div style={container}>
-            <canvas ref="leftPad"/>
-            <canvas ref="field"/>
-            <canvas ref="rightPad"/>
+        const {container} = this.styles
+        return <div className="GameField">
+            <div className="GameContainer" style={this.styles.container}>
+                {/*<canvas ref="leftPad"/>*/}
+                <canvas ref="field" />
+                {/*<canvas ref="rightPad"/>*/}
+            </div>
         </div>
     }
 }
