@@ -8,7 +8,12 @@ export default class GameChat extends Component {
 
     state = {
         message: '',
-        messages: []
+        history: []
+    }
+
+    static propTypes = {
+        newMessage: React.PropTypes.object.isRequired,
+        onSendMessage: React.PropTypes.func.isRequired
     }
 
     scrollToBottom = () => {
@@ -20,10 +25,16 @@ export default class GameChat extends Component {
         if(this.state.message) {
             const ms = this.state.message;
             this.setState({
-                message: '',
-                messages:[...this.state.messages, ms]
+                message: ''
             })
-            setTimeout(this.scrollToBottom, 10)
+            this.props.onSendMessage(ms)
+        }
+    }
+
+    componentWillReceiveProps(nextProps) {
+        if(nextProps.newMessage) {
+            this.setState({history: [...history, nextProps.newMessage]})
+            setTimeout(this.scrollToBottom, 0)
         }
     }
 
@@ -35,9 +46,9 @@ export default class GameChat extends Component {
                     ref="chat_container"
                >
                    <List>
-                       {this.state.messages.map((message, i) => {
+                       {this.history.map((data, i) => {
                            return <ListItem key={i}
-                                            primaryText={message}
+                                            primaryText={`${data.name}: ${data.message}`}
                            />
                        } )}
                    </List>
