@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import GameChat from './GameChat'
 import GameField from "./GameField"
+import ScoreBoard from './ScoreBoard'
 
 export default class GameScreen extends Component {
 
@@ -10,7 +11,8 @@ export default class GameScreen extends Component {
 
     state = {
         roomId: '',
-        newMessage: {}
+        newMessage: {},
+        opponent: ''
     }
 
     constructor(props) {
@@ -20,9 +22,6 @@ export default class GameScreen extends Component {
             this.props.socket.on('new_game_created', (roomId) => {
                 console.log('you created ' + roomId)
                 this.setState({roomId})
-            })
-            this.props.socket.on('user_joined', (userName) => {
-                console.log(userName + ' has joined your room')
             })
             this.props.socket.on('disconnect', () => {
                 this.props.socket.emit('host_disconnected', this.state.roomId)
@@ -34,6 +33,10 @@ export default class GameScreen extends Component {
             this.state.roomId = roomId
         }
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
+        this.props.socket.on('opponent_joined', (userName) => {
+            console.log('Your opponent is ${username}')
+            this.setState({opponent: userName})
+        })
     }
 
     onSendMessage = (message) => {
@@ -48,9 +51,18 @@ export default class GameScreen extends Component {
     render() {
         return <div className="GameScreen">
             <GameField/>
-            <GameChat onSendMessage={this.onSendMessage}
-                      newMessage={this.state.newMessage}
-                      name={this.props.params.name}/>
+
+            <div className="row BottomPanel">
+                <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
+                    <ScoreBoard myName={this.props.params.name} myScore={0}
+                    otherName={this.state.opponent} otherScore={0}/>
+                </div>
+                <div className="GameChat col-md-8 col-md-8 col-sm-8">
+                    <GameChat onSendMessage={this.onSendMessage}
+                              newMessage={this.state.newMessage}
+                              name={this.props.params.name}/>
+                </div>
+            </div>
         </div>
     }
 }

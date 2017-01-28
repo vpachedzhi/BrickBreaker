@@ -51,7 +51,7 @@ export default class GameChat extends Component {
                            const isAuthor = this.props.name === data.author
                            return <ListItem key={i}
                                             primaryText={
-                                                <span className={isAuthor ? 'HostMsg' : 'GuestMsg'}>
+                                                <span className={isAuthor ? 'MeMsg' : 'OtherMsg'}>
                                                     {data.message}
                                                 </span>
                                             }
