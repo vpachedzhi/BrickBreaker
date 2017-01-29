@@ -61,6 +61,7 @@ export default class StartScreen extends Component {
                     <div className="row">
                         <div className="col-md-6">
                             <TextField hintText="Enter username"
+                                       maxLength="12"
                                        value={this.state.username}
                                        onChange={(e) => this.onTextChange(e.target.value)}
                                        errorText={this.state.errorText}
