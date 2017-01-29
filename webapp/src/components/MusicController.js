@@ -22,6 +22,9 @@ export default class MusicController extends Component {
 
     constructor() {
         super()
+        let audioElement = document.createElement('audio')
+        audioElement.setAttribute('src', 'pow.wav')
+        this.audio = audioElement
     }
 
     handleVolumeChange = (e, volume) => {
@@ -35,14 +38,12 @@ export default class MusicController extends Component {
     }
 
     componentDidMount() {
-        this.refs.music_audio.play()
         this.refs.music_audio.volume = this.state.volume
-        ee.on('BALL_HIT', this.playPowSound.bind(this))
+        ee.on('BALL_HIT', () => this.refs.sound_audio.play())
     }
 
-    playPowSound = () => {
-        console.log('ball hit')
-        //if(this.state.soundOn) this.refs.sound_audio.play()
+    componentWillUnmount() {
+        ee.off('BALL_HIT')
     }
 
     render() {
