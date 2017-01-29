@@ -7,19 +7,18 @@ export default class GameField extends Component {
         running: React.PropTypes.bool.isRequired
     }
 
-    state = {
-        //paused: !this.props.running
-        paused: true
-    }
+    componentWillReceiveProps(newProps) {
+        if(newProps.running) {
+            this.interval = setInterval(this.draw, 10)
+        }
+        else
+            clearInterval(this.interval)
 
-    constructor(props) {
-        super(props)
     }
-
 
     componentDidMount() {
-        this.refs.canvas.height = this.refs.gameContainer.clientHeight
-        this.refs.canvas.width = this.refs.gameContainer.clientWidth
+        // this.refs.canvas.height = this.refs.gameContainer.clientHeight
+        // this.refs.canvas.width = this.refs.gameContainer.clientWidth
         const canvas = this.refs.canvas
         this.ballRadius = canvas.width/120
         this.paddleWidth = this.ballRadius*2
@@ -29,6 +28,7 @@ export default class GameField extends Component {
         this.ballY = canvas.height-this.ballRadius
         this.dx = 7
         this.dy = -this.dx
+        console.log(canvas.width, canvas.height)
         this.draw()
     }
 
@@ -65,11 +65,11 @@ export default class GameField extends Component {
 
         if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
             this.dx = -dx;
-            ee.emit('BALL HIT')
+            ee.emit('BALL_HIT')
         }
         if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
             this.dy = -dy;
-            ee.emit('BALL HIT')
+            ee.emit('BALL_HIT')
         }
 
         this.ballX += dx;
@@ -82,9 +82,9 @@ export default class GameField extends Component {
             <div className="GameContainer"
                  ref="gameContainer"
                  onMouseMove={e => this.mouseY = e.clientY}>
-                <canvas ref="canvas" onKeyPress={e => {
+                <canvas ref="canvas" width={1200} height={600} onKeyPress={e => {
                     switch (e.key) {
-                        case ' ':
+                        case ' sfdsf':
                             if(this.state.paused){
                                 this.interval = setInterval(this.draw, 10)
                                 this.setState({paused: false})

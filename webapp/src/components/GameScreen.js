@@ -18,7 +18,8 @@ export default class GameScreen extends Component {
         opponent: '',
         hostModalOpen: false,
         guestModalOpen: false,
-        opponentLeft: false
+        opponentLeft: false,
+        running: false
     }
 
     constructor(props) {
@@ -32,13 +33,15 @@ export default class GameScreen extends Component {
             this.props.socket.on('disconnect', () => {
                 this.props.socket.emit('host_disconnected', this.state.roomId)
             })
-        } else {
+        }
+        else {
             const {roomId, name} = this.props.params
             this.props.socket.emit('join_game', {roomId, name})
             console.log(name + ', you joined ' + roomId)
             this.state.roomId = roomId
             this.state.guestModalOpen = true
         }
+
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
 
         this.props.socket.on('opponent_joined', (userName) => {
@@ -50,6 +53,10 @@ export default class GameScreen extends Component {
 
         this.props.socket.on('opponent_left', () => {
             this.setState({opponentLeft: true})
+        })
+
+        this.props.socket.on('game_started', () => {
+            this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
         })
     }
 
@@ -71,16 +78,16 @@ export default class GameScreen extends Component {
             <FlatButton
                 label="Start game"
                 primary={true}
-                onTouchTap={()=>{}}
+                onClick={() => this.props.socket.emit('start_game', {roomId: this.state.roomId})}
             />,
         ];
         const action = <FlatButton
-            label="Start screen"
+            label="Go to start screen"
             primary={true}
             onTouchTap={this.onOpponentLeft}
         />
         return <div className="GameScreen">
-            <GameField running={false}/>
+            <GameField running={this.state.running}/>
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name} myScore={0}
@@ -106,7 +113,6 @@ export default class GameScreen extends Component {
             </Dialog>
             <Dialog
                 title={`Please wait until ${this.state.opponent} start the game`}
-                actions={actions}
                 modal={false}
                 open={this.state.guestModalOpen}
             >

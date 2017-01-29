@@ -50,6 +50,12 @@ io.on('connection', function(socket){
         console.log(`${data.author}: ${data.message} in ${data.roomId}`)
     })
 
+    socket.on('start_game', (data) => {
+        socket.broadcast.to(data.roomId).emit('game_started')
+        socket.emit('game_started')
+        console.log(`Game started in room: ${data.roomId}`)
+    })
+
 })
 
 const notifyUpdate = () => {
