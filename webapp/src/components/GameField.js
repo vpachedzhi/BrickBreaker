@@ -3,88 +3,101 @@ import React, {Component} from 'react'
 export default class GameField extends Component {
 
     static propTypes = {
-
+        running: React.PropTypes.bool.isRequired
     }
 
     state = {
-
+        //paused: !this.props.running
+        paused: true
     }
 
     constructor(props) {
         super(props)
     }
 
+    // componentWilReceiveProps(nextProps) {
+    //     if(nextProps)
+    // }
+
     componentDidMount() {
         this.refs.canvas.height = this.refs.gameContainer.clientHeight
         this.refs.canvas.width = this.refs.gameContainer.clientWidth
-        this.startDraw()
+        const canvas = this.refs.canvas
+        this.ballRadius = canvas.width/120
+        this.paddleWidth = this.ballRadius*2
+        this.paddleHeight = canvas.height/3
+        this.mouseY = canvas.height/3+(this.paddleHeight/2)
+        this.ballX = canvas.width/2
+        this.ballY = canvas.height-this.ballRadius
+        this.dx = 10
+        this.dy = -this.dx
+        this.draw()
     }
 
-    dimensions = {
-        width: '1100px',
-        height: '600px',
-    }
-
-    styles = {
-
-        container: {
-            width: this.dimensions.width,
-            height: this.dimensions.height,
-        },
-        leftPad: {
-            width: '50px',
-            height: this.dimensions.height,
-        },
-        ballArea: {
-            width: '1000px',
-            height: this.dimensions.height,
-        }
-
-    }
-
-    startDraw = () => {
+    draw = () => {
         const canvas = this.refs.canvas,
-            ctx = canvas.getContext('2d')
-        const ballRadius = 10
-        let x = canvas.width/2,
-            y = canvas.height-30,
-            dx = 10,
-            dy = -dx
+            ctx = canvas.getContext('2d'),
+            {ballRadius,paddleWidth, paddleHeight, ballX, ballY, dx, dy} = this
         const drawBall = () => {
                 ctx.beginPath();
-                ctx.arc(x, y, ballRadius, 0, Math.PI*2);
+                ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             },
-            draw = () => {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawBall();
-
-                if(x + dx > canvas.width-ballRadius || x + dx < ballRadius) {
-                    dx = -dx;
-                }
-                if(y + dy > canvas.height-ballRadius || y + dy < ballRadius) {
-                    dy = -dy;
-                }
-
-                x += dx;
-                y += dy;
+            drawRightPaddle = () => {
+                ctx.beginPath();
+                ctx.rect(canvas.width-paddleWidth, this.mouseY-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
+            },
+            drawLeftPaddle = () => {
+                ctx.beginPath();
+                ctx.rect(0, this.mouseY-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.fillStyle = "#0095DD";
+                ctx.fill();
+                ctx.closePath();
             }
-        setInterval(draw, 10);
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBall()
+        drawRightPaddle()
+        drawLeftPaddle()
+
+        if(ballX + dx > canvas.width-(ballRadius+paddleWidth) || ballX + dx < (ballRadius+paddleWidth)) {
+            this.dx = -dx;
+        }
+        if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
+            this.dy = -dy;
+        }
+
+        this.ballX += dx;
+        this.ballY += dy;
     }
 
 
-
     render() {
-        const {container, leftPad, ballArea} = this.styles
-        return <div className="GameField">
+        return <div className="GameField" >
             <div className="GameContainer"
                  ref="gameContainer"
-                 onMouseMove={e => console.log(e.clientY)}>
-                {/*<canvas ref="leftPad" width={leftPad.width} height={leftPad.height}/>*/}
-                <canvas ref="canvas"/>
-                {/*<canvas ref="rightPad"/>*/}
+                 onMouseMove={e => this.mouseY = e.clientY}>
+                <canvas ref="canvas" onKeyPress={e => {
+                    switch (e.key) {
+                        case ' ':
+                            if(this.state.paused){
+                                this.interval = setInterval(this.draw, 30)
+                                this.setState({paused: false})
+                            }
+                            else {
+                                clearInterval(this.interval)
+                                this.setState({paused: true})
+                            }
+                            break
+                        default:
+                            break
+                    }
+                }} tabIndex="1"/>
             </div>
         </div>
     }

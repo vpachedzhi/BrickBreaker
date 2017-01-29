@@ -50,7 +50,7 @@ export default class GameScreen extends Component {
 
     render() {
         return <div className="GameScreen">
-            <GameField/>
+            <GameField running={false}/>
 
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
