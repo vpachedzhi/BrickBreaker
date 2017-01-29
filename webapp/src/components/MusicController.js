@@ -4,11 +4,13 @@ import MusicOn from 'material-ui/svg-icons/av/play-arrow'
 import MusicOff from 'material-ui/svg-icons/av/pause'
 import Slider from 'material-ui/Slider'
 import SoundController from './GameSoundController'
+import ee from '../utils/eventEmitter'
 
 export default class MusicController extends Component {
 
     state = {
-       musicOn : true
+       musicOn : true,
+        volume: 0.15
     }
 
     static propTypes = {
@@ -19,8 +21,9 @@ export default class MusicController extends Component {
         super()
     }
 
-    handleVolumeChange = (e, v) => {
-        this.refs.music_audio.volume = v
+    handleVolumeChange = (e, volume) => {
+        this.refs.music_audio.volume = volume
+        this.setState({volume})
     }
 
     toggle() {
@@ -31,12 +34,13 @@ export default class MusicController extends Component {
     componentDidMount() {
         this.refs.music_audio.setAttribute('src', 'http://trace.dnbradio.com/dnbradio_main.mp3')
         this.refs.music_audio.play()
-        this.refs.music_audio.volume = 0.75
+        this.refs.music_audio.volume = this.state.volume
+        console.log('mountig')
+        ee.on('BALL HIT', () => this.playPowSound())
     }
 
     playPowSound() {
-        console.log('HHHHHHHHHHHHHHASDHHSDAHDHS')
-        this.refs.sounds.playPowSound()
+        // this.refs.sounds.playPowSound()
     }
 
     render() {
@@ -48,7 +52,9 @@ export default class MusicController extends Component {
                 />
             </div>
             <div className="col-md-5 col-sm-5 col-xs-5" style={{marginTop: '5px'}}>
-                <Slider defaultValue={0.75}
+                <Slider
+                    disabled={!this.state.musicOn}
+                    value={this.state.volume}
                     onChange={this.handleVolumeChange}
                     sliderStyle={{margin: '0'}}
                 />

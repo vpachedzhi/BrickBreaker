@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import ee from '../utils/eventEmitter'
 
 export default class GameField extends Component {
 
@@ -15,9 +16,6 @@ export default class GameField extends Component {
         super(props)
     }
 
-    // componentWilReceiveProps(nextProps) {
-    //     if(nextProps)
-    // }
 
     componentDidMount() {
         this.refs.canvas.height = this.refs.gameContainer.clientHeight
@@ -67,9 +65,11 @@ export default class GameField extends Component {
 
         if(ballX + dx > canvas.width-(ballRadius+paddleWidth) || ballX + dx < (ballRadius+paddleWidth)) {
             this.dx = -dx;
+            ee.emit('BALL HIT')
         }
         if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
             this.dy = -dy;
+            ee.emit('BALL HIT')
         }
 
         this.ballX += dx;
