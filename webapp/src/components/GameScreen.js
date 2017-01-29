@@ -2,6 +2,9 @@ import React, {Component} from 'react'
 import GameChat from './GameChat'
 import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
+import RefreshIndicator from 'material-ui/RefreshIndicator'
 
 export default class GameScreen extends Component {
 
@@ -12,7 +15,9 @@ export default class GameScreen extends Component {
     state = {
         roomId: '',
         newMessage: {},
-        opponent: ''
+        opponent: '',
+        hostModalOpen: false,
+        guestModalOpen: false
     }
 
     constructor(props) {
@@ -31,11 +36,14 @@ export default class GameScreen extends Component {
             this.props.socket.emit('join_game', {roomId, name})
             console.log(name + ', you joined ' + roomId)
             this.state.roomId = roomId
+            this.state.guestModalOpen = true
         }
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
         this.props.socket.on('opponent_joined', (userName) => {
-            console.log('Your opponent is ${username}')
+            console.log(`Your opponent is ${userName}`)
             this.setState({opponent: userName})
+            if(this.props.params.role === 'host')
+                this.setState({hostModalOpen: true})
         })
     }
 
@@ -49,9 +57,15 @@ export default class GameScreen extends Component {
     }
 
     render() {
+        const actions = [
+            <FlatButton
+                label="Start game"
+                primary={true}
+                onTouchTap={()=>{}}
+            />,
+        ];
         return <div className="GameScreen">
             <GameField running={false}/>
-
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name} myScore={0}
@@ -65,6 +79,29 @@ export default class GameScreen extends Component {
                               name={this.props.params.name}/>
                 </div>
             </div>
+            <Dialog
+                title={`${this.state.opponent} want to play with you`}
+                actions={actions}
+                modal={false}
+                open={this.state.hostModalOpen}
+            >
+                You are the host.
+                You can can start the game whenever you want.
+                Good luck !!!
+            </Dialog>
+            <Dialog
+                title={`Please wait until ${this.state.opponent} start the game`}
+                actions={actions}
+                modal={false}
+                open={this.state.guestModalOpen}
+            >
+                <RefreshIndicator
+                    size={50}
+                    left={50}
+                    top={50}
+                    status="loading"
+                />
+            </Dialog>
         </div>
     }
 }

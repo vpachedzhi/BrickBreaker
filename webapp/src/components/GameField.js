@@ -27,7 +27,7 @@ export default class GameField extends Component {
         this.mouseY = canvas.height/3+(this.paddleHeight/2)
         this.ballX = canvas.width/2
         this.ballY = canvas.height-this.ballRadius
-        this.dx = 10
+        this.dx = 7
         this.dy = -this.dx
         this.draw()
     }
@@ -63,7 +63,7 @@ export default class GameField extends Component {
         drawRightPaddle()
         drawLeftPaddle()
 
-        if(ballX + dx > canvas.width-(ballRadius+paddleWidth) || ballX + dx < (ballRadius+paddleWidth)) {
+        if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
             this.dx = -dx;
             ee.emit('BALL HIT')
         }
@@ -86,7 +86,7 @@ export default class GameField extends Component {
                     switch (e.key) {
                         case ' ':
                             if(this.state.paused){
-                                this.interval = setInterval(this.draw, 30)
+                                this.interval = setInterval(this.draw, 10)
                                 this.setState({paused: false})
                             }
                             else {

@@ -35,7 +35,6 @@ export default class MusicController extends Component {
         this.refs.music_audio.setAttribute('src', 'http://trace.dnbradio.com/dnbradio_main.mp3')
         this.refs.music_audio.play()
         this.refs.music_audio.volume = this.state.volume
-        console.log('mountig')
         ee.on('BALL HIT', () => this.playPowSound())
     }
 

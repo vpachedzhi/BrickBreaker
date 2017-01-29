@@ -1,4 +1,4 @@
-class EventEmitter{
+class EventEmitter {
 
     constructor() {
         this.callbackMapper = {}
@@ -14,6 +14,10 @@ class EventEmitter{
         if(callbacks) {
             callbacks.forEach(callback => callback(...args))
         }
+    }
+
+    off = (eventName) => {
+        delete this.callbackMapper[eventName]
     }
 }
 
