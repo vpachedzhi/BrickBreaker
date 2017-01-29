@@ -2,15 +2,18 @@ import React, {Component} from 'react'
 import Checkbox from 'material-ui/Checkbox'
 import MusicOn from 'material-ui/svg-icons/av/play-arrow'
 import MusicOff from 'material-ui/svg-icons/av/pause'
+import SoundOn from 'material-ui/svg-icons/av/volume-up'
+import SoundOff from 'material-ui/svg-icons/av/volume-off'
 import Slider from 'material-ui/Slider'
-import SoundController from './GameSoundController'
+
 import ee from '../utils/eventEmitter'
 
 export default class MusicController extends Component {
 
     state = {
        musicOn : true,
-        volume: 0.15
+       soundOn: true,
+       volume: 0.15
     }
 
     static propTypes = {
@@ -32,14 +35,13 @@ export default class MusicController extends Component {
     }
 
     componentDidMount() {
-        this.refs.music_audio.setAttribute('src', 'http://trace.dnbradio.com/dnbradio_main.mp3')
         this.refs.music_audio.play()
         this.refs.music_audio.volume = this.state.volume
         ee.on('BALL HIT', () => this.playPowSound())
     }
 
     playPowSound() {
-        // this.refs.sounds.playPowSound()
+        if(this.state.soundOn) this.refs.sound_audio.play()
     }
 
     render() {
@@ -59,9 +61,14 @@ export default class MusicController extends Component {
                 />
             </div>
             <div className="col-sm-5 col-xs-5 col-md-5">
-                <SoundController ref="sounds"/>
+                <Checkbox
+                    checkedIcon={<SoundOff/>}
+                    uncheckedIcon={<SoundOn/>}
+                    onClick={()=> {this.setState({soundOn: !this.state.soundOn})}}
+                />
             </div>
-            <audio ref="music_audio"/>
+            <audio ref="music_audio" src="http://trace.dnbradio.com/dnbradio_main.mp3"/>
+            <audio ref="sound_audio" src="../pow.wav"/>
         </div>)
     }
 

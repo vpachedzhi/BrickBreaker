@@ -17,7 +17,8 @@ export default class GameScreen extends Component {
         newMessage: {},
         opponent: '',
         hostModalOpen: false,
-        guestModalOpen: false
+        guestModalOpen: false,
+        opponentLeft: false
     }
 
     constructor(props) {
@@ -39,11 +40,16 @@ export default class GameScreen extends Component {
             this.state.guestModalOpen = true
         }
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
+
         this.props.socket.on('opponent_joined', (userName) => {
             console.log(`Your opponent is ${userName}`)
             this.setState({opponent: userName})
             if(this.props.params.role === 'host')
                 this.setState({hostModalOpen: true})
+        })
+
+        this.props.socket.on('opponent_left', () => {
+            this.setState({opponentLeft: true})
         })
     }
 
@@ -56,6 +62,10 @@ export default class GameScreen extends Component {
         this.setState({newMessage: data})
     }
 
+    onOpponentLeft = () => {
+        console.log("BACK to START")
+    }
+
     render() {
         const actions = [
             <FlatButton
@@ -64,6 +74,11 @@ export default class GameScreen extends Component {
                 onTouchTap={()=>{}}
             />,
         ];
+        const action = <FlatButton
+            label="Start screen"
+            primary={true}
+            onTouchTap={this.onOpponentLeft}
+        />
         return <div className="GameScreen">
             <GameField running={false}/>
             <div className="row BottomPanel">
@@ -101,6 +116,14 @@ export default class GameScreen extends Component {
                     top={50}
                     status="loading"
                 />
+            </Dialog>
+            <Dialog
+                actions={[action]}
+                modal={false}
+                open={this.state.opponentLeft}
+                onRequestClose={this.onOpponentLeft}
+            >
+                {this.state.opponent} left the game!
             </Dialog>
         </div>
     }
