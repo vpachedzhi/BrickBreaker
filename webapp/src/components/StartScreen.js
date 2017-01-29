@@ -54,27 +54,34 @@ export default class StartScreen extends Component {
 
     render() {
         return <Paper className="StartScreen">
-            <div className="row">
+            <div className="row" style={{height: '10%'}}>
                 <div className="col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
-                    <TextField hintText="Enter username"
-                               value={this.state.username}
-                               onChange={(e) => this.onTextChange(e.target.value)}
-                               errorText={this.state.errorText}
-                               onKeyPress={(e)=>  {
-                                   if (e.key === 'Enter')
-                                       this.onCreateGame()
-                               }}
-                    />
-                    <RaisedButton label="Create game"
-                                  primary={true}
-                                  disabled={!this.state.username}
-                                  onClick={this.onCreateGame}
-                                  style={{position: 'absolute'}}
-                    />
+                    <div className="row">
+                        <div className="col-md-6">
+                            <TextField hintText="Enter username"
+                                       value={this.state.username}
+                                       onChange={(e) => this.onTextChange(e.target.value)}
+                                       errorText={this.state.errorText}
+                                       fullWidth={true}
+                                       onKeyPress={(e)=>  {
+                                           if (e.key === 'Enter')
+                                               this.onCreateGame()
+                                       }}
+                            />
+                        </div>
+                        <div className="col-md-6">
+                            <RaisedButton label="Create game"
+                                          primary={true}
+                                          disabled={!this.state.username}
+                                          onClick={this.onCreateGame}
+                                          fullWidth={true}
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div className="row">
-                <div className="col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+            <div className="row" style={{height: '80%'}}>
+                <div className="GamesList col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
                     <List>
                         {this.state.roomsList.map((game, i) => {
                             return <ListItem key={i}
@@ -88,6 +95,11 @@ export default class StartScreen extends Component {
                             />
                         } )}
                     </List>
+                </div>
+            </div>
+            <div className="row" style={{height: '10%'}}>
+                <div className="col-sm-4 col-sm-offset-2 col-md-2 col-md-offset-1 col-xs-8 col-xs-offset-4">
+                  {this.props.children}
                 </div>
             </div>
         </Paper>

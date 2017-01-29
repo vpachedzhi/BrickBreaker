@@ -74,8 +74,6 @@ export default class GameField extends Component {
         setInterval(draw, 10);
     }
 
-
-
     render() {
         const {container, leftPad, ballArea} = this.styles
         return <div className="GameField">

@@ -17,6 +17,9 @@ export default class ScoreBoard extends Component {
                 <ListItem primaryText={`${this.props.myName}: ${this.props.myScore}`}/>
                 <ListItem primaryText={`${this.props.otherName}: ${this.props.otherScore}`}/>
             </List>
+            <div className="row">
+                <div className="col-sm-6 col-sm-offset-1"> {this.props.children} </div>
+            </div>
         </Paper>)
     }
 }
