@@ -1,4 +1,5 @@
 import React, {Component} from 'react'
+import {hashHistory} from 'react-router'
 import GameChat from './GameChat'
 import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
@@ -63,7 +64,10 @@ export default class GameScreen extends Component {
     }
 
     onOpponentLeft = () => {
-        console.log("BACK to START")
+        hashHistory.push(`/`)
+        // if(this.props.params.role === 'guest' || this.state.isRunning) {
+        //     hashHistory.push(`/`)
+        // }
     }
 
     render() {
@@ -75,7 +79,7 @@ export default class GameScreen extends Component {
             />,
         ];
         const action = <FlatButton
-            label="Start screen"
+            label={"Back to start screen"}
             primary={true}
             onTouchTap={this.onOpponentLeft}
         />
