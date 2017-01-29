@@ -55,7 +55,9 @@ export default class GameScreen extends Component {
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name} myScore={0}
-                    otherName={this.state.opponent} otherScore={0}/>
+                                otherName={this.state.opponent} otherScore={0}>
+                        {this.props.children}
+                    </ScoreBoard>
                 </div>
                 <div className="GameChat col-md-8 col-md-8 col-sm-8">
                     <GameChat onSendMessage={this.onSendMessage}

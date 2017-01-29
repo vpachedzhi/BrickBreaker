@@ -9,6 +9,10 @@ body {
     width: 100%;
 }
 
+.GamesList {
+    overflow-y: scroll;
+}
+
 .GameScreen {
     position: absolute;
     width: 100%;
