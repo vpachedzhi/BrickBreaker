@@ -2,6 +2,8 @@ import React, {Component} from 'react'
 import GameChat from './GameChat'
 import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
 
 export default class GameScreen extends Component {
 
@@ -12,7 +14,8 @@ export default class GameScreen extends Component {
     state = {
         roomId: '',
         newMessage: {},
-        opponent: ''
+        opponent: '',
+        opponentLeft: false
     }
 
     constructor(props) {
@@ -33,9 +36,14 @@ export default class GameScreen extends Component {
             this.state.roomId = roomId
         }
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
+
         this.props.socket.on('opponent_joined', (userName) => {
-            console.log('Your opponent is ${username}')
+            console.log(`Your opponent is ${userName}`)
             this.setState({opponent: userName})
+        })
+
+        this.props.socket.on('opponent_left', () => {
+            this.setState({opponentLeft: true})
         })
     }
 
@@ -48,7 +56,16 @@ export default class GameScreen extends Component {
         this.setState({newMessage: data})
     }
 
+    onOpponentLeft = () => {
+        console.log("BACK to START")
+    }
+
     render() {
+        const action = <FlatButton
+                label="Start screen"
+                primary={true}
+                onTouchTap={this.onOpponentLeft}
+        />
         return <div className="GameScreen">
             <GameField running={false}/>
 
@@ -65,6 +82,14 @@ export default class GameScreen extends Component {
                               name={this.props.params.name}/>
                 </div>
             </div>
+            <Dialog
+                actions={[action]}
+                modal={false}
+                open={this.state.opponentLeft}
+                onRequestClose={this.onOpponentLeft}
+            >
+                {this.state.opponent} left the game!
+            </Dialog>
         </div>
     }
 }

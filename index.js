@@ -26,6 +26,7 @@ io.on('connection', function(socket){
 
         socket.on('disconnect', () => {
             delete rooms[roomId]
+            socket.broadcast.to(roomId).emit('opponent_left')
             notifyUpdate()
         })
 
@@ -38,6 +39,9 @@ io.on('connection', function(socket){
         socket.join(data.roomId);
         rooms[data.roomId].socket.emit('opponent_joined', data.name)
         socket.emit('opponent_joined', rooms[data.roomId].hostname)
+        socket.on('disconnect', () => {
+            socket.broadcast.to(data.roomId).emit('opponent_left');
+        })
     })
 
     socket.on('message_sent', (data) => {
