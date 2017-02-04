@@ -56,6 +56,11 @@ io.on('connection', function(socket){
         console.log(`Game started in room: ${data.roomId}`)
     })
 
+    socket.on('mouse_move', (data) => {
+        socket.broadcast.to(data.roomId).emit('opponent_moved', data.y);
+        //rooms[data.roomiD]
+    })
+
 })
 
 const notifyUpdate = () => {

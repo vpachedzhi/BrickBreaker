@@ -19,6 +19,7 @@ export default class GameScreen extends Component {
         opponent: '',
         guestJoinedOpen: false,
         opponentLeft: false,
+        opponentY: 300,
         running: false
     }
 
@@ -34,7 +35,7 @@ export default class GameScreen extends Component {
                 this.props.socket.emit('host_disconnected', this.state.roomId)
             })
         }
-        else { // We are gust here
+        else { // We are guest here
             const {roomId, name} = this.props.params
             this.props.socket.emit('join_game', {roomId, name})
             console.log(name + ', you joined ' + roomId)
@@ -56,6 +57,11 @@ export default class GameScreen extends Component {
 
         this.props.socket.on('game_started', () => {
             this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
+        })
+
+        this.props.socket.on('opponent_moved', (y) => {
+            this.setState({opponentY: y})
+            console.log("OpponentY: " + y)
         })
     }
 
@@ -79,6 +85,15 @@ export default class GameScreen extends Component {
         // }
     }
 
+    onMouseMove = (y) => {
+        this.props.socket.emit('mouse_move', {
+            role: this.props.params.role,
+            roomId: this.props.params.roomId,
+            y
+        })
+        console.log("MY: " + y)
+    }
+
     render() {
         const confirmGuestJoined = <FlatButton
             label="Ok"
@@ -92,8 +107,10 @@ export default class GameScreen extends Component {
         />
         return <div className="GameScreen">
             <GameField running={this.state.running}
-                       opponentY={this.opponentY}
-                       isHost={this.props.params.role === 'host'}/>
+                       opponentY={this.state.opponentY}
+                       isHost={this.props.params.role === 'host'}
+                       onMouseMove={this.onMouseMove}
+            />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name} myScore={0}

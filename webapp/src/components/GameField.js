@@ -6,7 +6,8 @@ export default class GameField extends Component {
     static propTypes = {
         running: React.PropTypes.bool.isRequired,
         isHost: React.PropTypes.bool.isRequired,
-        opponentY: React.PropTypes.number.isRequired
+        opponentY: React.PropTypes.number.isRequired,
+        onMouseMove: React.PropTypes.func.isRequired
     }
 
     componentWillReceiveProps(newProps) {
@@ -61,17 +62,17 @@ export default class GameField extends Component {
             }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBall()
+        //drawBall()
         drawRightPaddle()
         drawLeftPaddle()
 
         if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
             this.dx = -dx;
-            ee.emit('BALL_HIT')
+            //ee.emit('BALL_HIT')
         }
         if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
             this.dy = -dy;
-            ee.emit('BALL_HIT')
+            //ee.emit('BALL_HIT')
         }
 
         this.ballX += dx;
@@ -81,6 +82,7 @@ export default class GameField extends Component {
     handleMouseMove = (e) => {
         // TODO: Emit event to server
         this.mouseY = e.clientY
+        this.props.onMouseMove(this.mouseY)
     }
 
 
