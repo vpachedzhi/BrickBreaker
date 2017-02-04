@@ -23,8 +23,7 @@ export default class GameField extends Component {
     }
 
     componentDidMount() {
-        // this.refs.canvas.height = this.refs.gameContainer.clientHeight
-        // this.refs.canvas.width = this.refs.gameContainer.clientWidth
+
         const canvas = this.refs.canvas
         this.ballRadius = canvas.width/120
         this.paddleWidth = this.ballRadius*2
@@ -35,7 +34,6 @@ export default class GameField extends Component {
         this.ballY = canvas.height-this.ballRadius
         this.dx = 7
         this.dy = -this.dx
-        console.log(canvas.width, canvas.height)
         this.draw()
         this.props.socket.on('opponent_moved', ({y}) => {
             this.opponentY = y
@@ -76,11 +74,11 @@ export default class GameField extends Component {
 
         if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
             this.dx = -dx;
-            //ee.emit('BALL_HIT')
+            ee.emit('BALL_HIT')
         }
         if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
             this.dy = -dy;
-            //ee.emit('BALL_HIT')
+            ee.emit('BALL_HIT')
         }
 
         this.ballX += dx;

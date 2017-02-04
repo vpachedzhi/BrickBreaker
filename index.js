@@ -30,7 +30,7 @@ io.on('connection', function(socket){
         socket.on('disconnect', () => {
             const game = games[socket.id]
 
-            if(game.guestName){
+            if(game && game.guestName){
                 socket.broadcast.to(game.guestSocketId).emit('opponent_left')
                 delete games[socket.id]
             } else {

@@ -5,7 +5,6 @@ import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import RefreshIndicator from 'material-ui/RefreshIndicator'
 
 export default class GameScreen extends Component {
 
@@ -27,7 +26,6 @@ export default class GameScreen extends Component {
         super(props)
         if(this.props.params.role === 'host') {
             this.props.socket.emit('create_game', {name: props.params.name})
-            console.log(this.props.socket.id)
             this.props.socket.on('opponent_joined', data => {
                 this.setState({
                     opponent: data.name,
@@ -56,9 +54,8 @@ export default class GameScreen extends Component {
     }
 
     onSendMessage = (message) => {
-        console.log(`You sent: ${message}`)
-        if(message === 'START' && this.state.opponent){
-            this.props.socket.emit('start_game', {roomId: this.state.roomId})
+        if(message === 'START' && this.props.params.role === 'host' && this.state.opponent){
+            this.props.socket.emit('start_game', {opponentSocketId: this.state.opponentSocketId})
         }
         else {
             this.props.socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
@@ -84,11 +81,7 @@ export default class GameScreen extends Component {
             primary={true}
             onTouchTap={this.onOpponentLeft}
         />
-        return <div className="GameScreen" onKeyPress={e => {
-            if(e.key === ' ' && this.props.params.role === 'host' && this.state.opponentSocketId){
-                this.props.socket.emit('start_game', {opponentSocketId: this.state.opponentSocketId})
-            }
-        }}>
+        return <div className="GameScreen">
             <GameField running={this.state.running}
                        opponentY={this.state.opponentY}
                        isHost={this.props.params.role === 'host'}

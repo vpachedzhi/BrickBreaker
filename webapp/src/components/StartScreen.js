@@ -23,7 +23,6 @@ export default class StartScreen extends Component {
     constructor(props) {
         super(props)
         this.props.socket.on('rooms_list_update', (roomsList) => {
-            console.log("list updated")
             this.setState({roomsList})
         })
     }
