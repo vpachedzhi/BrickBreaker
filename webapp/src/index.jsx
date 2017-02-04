@@ -16,7 +16,7 @@ const App = () => (
         <Router history={hashHistory}>
             <Route path="/" component={BaseRoute}>
                 <IndexRoute component={StartScreen}/>
-                <Route path="/game/:name/:role/:roomId" component={GameScreen}/>
+                <Route path="/game/:name/:role" component={GameScreen}/>
             </Route>
         </Router>
     </MuiThemeProvider>

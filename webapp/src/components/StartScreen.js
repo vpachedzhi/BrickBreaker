@@ -31,7 +31,7 @@ export default class StartScreen extends Component {
     onCreateGame = () => {
         if(this.state.username) {
             this.props.socket.off('rooms_list_update')
-            hashHistory.push(`/game/${this.state.username}/host/room`)
+            hashHistory.push(`/game/${this.state.username}/host`)
         } else {
             this.displayErrorText();
         }
@@ -40,7 +40,7 @@ export default class StartScreen extends Component {
     onJoinGame = (game) => {
         if(this.state.username) {
             this.props.socket.off('rooms_list_update')
-            hashHistory.push(`/game/${this.state.username}/guest/${game.roomId}`)
+            hashHistory.push(`/game/${this.state.username}/${game.socketHostId}~${game.hostName}`)
         } else {
             this.displayErrorText();
         }
@@ -88,8 +88,7 @@ export default class StartScreen extends Component {
                     <List>
                         {this.state.roomsList.map((game, i) => {
                             return <ListItem key={i}
-                                             primaryText={game.hostname}
-                                             secondaryText={game.roomId}
+                                             primaryText={game.hostName}
                                              disabled={!this.state.username}
                                              rightIconButton={
                                                  <IconButton><AvPlayCircleOutline/></IconButton>

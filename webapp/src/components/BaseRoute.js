@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import MusicController from './MusicController'
+import history from 'react-router'
 
 export default class BaseRoute extends Component {
 

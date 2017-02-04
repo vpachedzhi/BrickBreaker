@@ -14,9 +14,9 @@ export default class GameScreen extends Component {
     }
 
     state = {
-        roomId: '',
-        newMessage: {},
+        opponentSocketId: '',
         opponent: '',
+        newMessage: {},
         guestJoinedOpen: false,
         opponentLeft: false,
         opponentY: 300,
@@ -27,42 +27,41 @@ export default class GameScreen extends Component {
         super(props)
         if(this.props.params.role === 'host') {
             this.props.socket.emit('create_game', {name: props.params.name})
-            this.props.socket.on('new_game_created', (roomId) => {
-                console.log('you created ' + roomId)
-                this.setState({roomId})
+            console.log(this.props.socket.id)
+            this.props.socket.on('opponent_joined', data => {
+                this.setState({
+                    opponent: data.name,
+                    opponentSocketId: data.socketGuestId,
+                    guestJoinedOpen: true
+                })
             })
-            this.props.socket.on('disconnect', () => {
-                this.props.socket.emit('host_disconnected', this.state.roomId)
-            })
+            // this.props.socket.on('new_game_created', (roomId) => {
+            //     console.log('you created ' + roomId)
+            //     this.setState({roomId})
+            // })
+            // this.props.socket.on('disconnect', () => {
+            //     this.props.socket.emit('host_disconnected', this.state.roomId)
+            // })
         }
         else { // We are guest here
-            const {roomId, name} = this.props.params
-            this.props.socket.emit('join_game', {roomId, name})
-            console.log(name + ', you joined ' + roomId)
-            this.state.roomId = roomId
+            const [socketHostId, hostName] = this.props.params.role.split('~')
+            this.state.opponentSocketId = socketHostId
+            this.state.opponent = hostName
+            this.props.socket.emit('join_game', {socketHostId, name: this.props.params.name})
         }
-
-        this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
-
-        this.props.socket.on('opponent_joined', (userName) => {
-            console.log(`Your opponent is ${userName}`)
-            this.setState({opponent: userName})
-            if(this.props.params.role === 'host')
-                this.setState({guestJoinedOpen: true})
-        })
 
         this.props.socket.on('opponent_left', () => {
             this.setState({opponentLeft: true})
         })
-
-        this.props.socket.on('game_started', () => {
-            this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
-        })
-
-        this.props.socket.on('opponent_moved', (y) => {
-            this.setState({opponentY: y})
-            console.log("OpponentY: " + y)
-        })
+        //
+        // this.props.socket.on('game_started', () => {
+        //     this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
+        // })
+        //
+        // this.props.socket.on('opponent_moved', (y) => {
+        //     this.setState({opponentY: y})
+        //     console.log("OpponentY: " + y)
+        // })
     }
 
     onSendMessage = (message) => {
@@ -80,9 +79,6 @@ export default class GameScreen extends Component {
 
     onOpponentLeft = () => {
         hashHistory.push(`/`)
-        // if(this.props.params.role === 'guest' || this.state.isRunning) {
-        //     hashHistory.push(`/`)
-        // }
     }
 
     onMouseMove = (y) => {
@@ -91,7 +87,7 @@ export default class GameScreen extends Component {
             roomId: this.props.params.roomId,
             y
         })
-        console.log("MY: " + y)
+        //console.log("MY: " + y)
     }
 
     render() {

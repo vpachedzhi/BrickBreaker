@@ -13,8 +13,7 @@ export default class GameChat extends Component {
 
     static propTypes = {
         newMessage: React.PropTypes.object.isRequired,
-        onSendMessage: React.PropTypes.func.isRequired,
-        isHost: React.PropTypes.bool
+        onSendMessage: React.PropTypes.func.isRequired
     }
 
     scrollToBottom = () => {
