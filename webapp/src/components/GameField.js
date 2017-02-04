@@ -6,8 +6,6 @@ export default class GameField extends Component {
     static propTypes = {
         running: React.PropTypes.bool.isRequired,
         isHost: React.PropTypes.bool.isRequired,
-        // opponentY: React.PropTypes.number.isRequired,
-        // onMouseMove: React.PropTypes.func.isRequired
         socket: React.PropTypes.object.isRequired,
         opponentSocketId: React.PropTypes.string.isRequired
     }
@@ -44,7 +42,7 @@ export default class GameField extends Component {
     draw = () => {
         const canvas = this.refs.canvas,
             ctx = canvas.getContext('2d'),
-            {ballRadius,paddleWidth, paddleHeight, ballX, ballY, dx, dy} = this
+            {ballRadius, paddleWidth, paddleHeight, ballX, ballY, dx, dy, mouseY, opponentY} = this
         const drawBall = () => {
                 ctx.beginPath();
                 ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
@@ -54,14 +52,14 @@ export default class GameField extends Component {
             },
             drawRightPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? this.opponentY : this.mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? opponentY : mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             },
             drawLeftPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(0, (this.props.isHost ? this.mouseY : this.opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(0, (this.props.isHost ? mouseY :opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
@@ -72,10 +70,18 @@ export default class GameField extends Component {
         drawRightPaddle()
         drawLeftPaddle()
 
-        if(ballX + dx > canvas.width-ballRadius || ballX + dx < ballRadius) {
+        if(ballX + dx > canvas.width-ballRadius - paddleWidth) { // When ball is on the right side
+
+            this.dx = -dx;
+            ee.emit('BALL_HIT')
+        } else if(ballX + dx < ballRadius + paddleWidth) { // When ball is on the left side
+            if(this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
+                console.log("HOST: BOOOOM")
+            }
             this.dx = -dx;
             ee.emit('BALL_HIT')
         }
+
         if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
             this.dy = -dy;
             ee.emit('BALL_HIT')
