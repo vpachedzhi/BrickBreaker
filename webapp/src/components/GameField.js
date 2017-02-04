@@ -4,7 +4,9 @@ import ee from '../utils/eventEmitter'
 export default class GameField extends Component {
 
     static propTypes = {
-        running: React.PropTypes.bool.isRequired
+        running: React.PropTypes.bool.isRequired,
+        isHost: React.PropTypes.bool.isRequired,
+        opponentY: React.PropTypes.number.isRequired
     }
 
     componentWillReceiveProps(newProps) {
@@ -45,14 +47,14 @@ export default class GameField extends Component {
             },
             drawRightPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(canvas.width-paddleWidth, this.mouseY-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? this.props.opponentY : this.mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             },
             drawLeftPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(0, this.mouseY-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(0, (this.props.isHost ? this.mouseY : this.props.opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
@@ -76,12 +78,17 @@ export default class GameField extends Component {
         this.ballY += dy;
     }
 
+    handleMouseMove = (e) => {
+        // TODO: Emit event to server
+        this.mouseY = e.clientY
+    }
+
 
     render() {
         return <div className="GameField" >
             <div className="GameContainer"
                  ref="gameContainer"
-                 onMouseMove={e => this.mouseY = e.clientY}>
+                 onMouseMove={this.handleMouseMove}>
                 <canvas ref="canvas" width={1200} height={600} onKeyPress={e => {
                     switch (e.key) {
                         case ' sfdsf':

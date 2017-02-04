@@ -91,7 +91,9 @@ export default class GameScreen extends Component {
             onTouchTap={this.onOpponentLeft}
         />
         return <div className="GameScreen">
-            <GameField running={this.state.running}/>
+            <GameField running={this.state.running}
+                       opponentY={this.opponentY}
+                       isHost={this.props.params.role === 'host'}/>
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name} myScore={0}
