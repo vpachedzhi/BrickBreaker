@@ -5,6 +5,7 @@ import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
+import debouce from 'debounce'
 import RefreshIndicator from 'material-ui/RefreshIndicator'
 
 export default class GameScreen extends Component {
@@ -35,13 +36,6 @@ export default class GameScreen extends Component {
                     guestJoinedOpen: true
                 })
             })
-            // this.props.socket.on('new_game_created', (roomId) => {
-            //     console.log('you created ' + roomId)
-            //     this.setState({roomId})
-            // })
-            // this.props.socket.on('disconnect', () => {
-            //     this.props.socket.emit('host_disconnected', this.state.roomId)
-            // })
         }
         else { // We are guest here
             const [socketHostId, hostName] = this.props.params.role.split('~')
@@ -53,14 +47,13 @@ export default class GameScreen extends Component {
         this.props.socket.on('opponent_left', () => {
             this.setState({opponentLeft: true})
         })
-        //
-        // this.props.socket.on('game_started', () => {
-        //     this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
-        // })
-        //
-        // this.props.socket.on('opponent_moved', (y) => {
+
+        this.props.socket.on('game_started', () => {
+            this.setState({running: true})
+        })
+
+        // this.props.socket.on('opponent_moved', ({y}) => {
         //     this.setState({opponentY: y})
-        //     console.log("OpponentY: " + y)
         // })
     }
 
@@ -81,14 +74,11 @@ export default class GameScreen extends Component {
         hashHistory.push(`/`)
     }
 
-    onMouseMove = (y) => {
-        this.props.socket.emit('mouse_move', {
-            role: this.props.params.role,
-            roomId: this.props.params.roomId,
-            y
-        })
-        //console.log("MY: " + y)
-    }
+    // onMouseMove = (y) => {
+    //     if(this.state.running){
+    //         this.props.socket.emit('mouse_move', {y, opponentSocketId: this.state.opponentSocketId})
+    //     }
+    // }
 
     render() {
         const confirmGuestJoined = <FlatButton
@@ -101,11 +91,16 @@ export default class GameScreen extends Component {
             primary={true}
             onTouchTap={this.onOpponentLeft}
         />
-        return <div className="GameScreen">
+        return <div className="GameScreen" onKeyPress={e => {
+            if(e.key === ' ' && this.props.params.role === 'host' && this.state.opponentSocketId){
+                this.props.socket.emit('start_game', {opponentSocketId: this.state.opponentSocketId})
+            }
+        }}>
             <GameField running={this.state.running}
                        opponentY={this.state.opponentY}
                        isHost={this.props.params.role === 'host'}
-                       onMouseMove={this.onMouseMove}
+                       opponentSocketId={this.state.opponentSocketId}
+                       socket={this.props.socket}
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
@@ -127,7 +122,7 @@ export default class GameScreen extends Component {
                 open={this.state.guestJoinedOpen}
             >
                 You are the host.
-                You can can start the game whenever you want by the start button.
+                You can can start the game whenever you want by typing START in the chat.
                 Good luck !!!
             </Dialog>
             <Dialog

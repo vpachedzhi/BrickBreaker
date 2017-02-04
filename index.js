@@ -14,6 +14,8 @@ let games = {}
 
 io.on('connection', function(socket){
 
+    console.log(`${socket.id} connected`)
+
     socket.emit('rooms_list_update', getGames())
 
     socket.on('create_game', (data) => {
@@ -35,6 +37,14 @@ io.on('connection', function(socket){
                 delete games[socket.id]
                 notifyUpdate()
             }
+            console.log(`${socket.id} disconnected`)
+        })
+
+        socket.on('start_game', ({opponentSocketId}) => {
+            socket.broadcast.to(opponentSocketId).emit('game_started')
+            socket.emit('game_started')
+            const {hostName, guestName} = games[socket.id]
+            console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
         })
     })
 
@@ -50,6 +60,7 @@ io.on('connection', function(socket){
         socket.on('disconnect', () => {
             delete games[socketHostId]
             socket.broadcast.to(socketHostId).emit('opponent_left')
+            console.log(`${socket.id} disconnected`)
         })
     })
 
@@ -62,16 +73,11 @@ io.on('connection', function(socket){
     //     console.log(`${data.author}: ${data.message} in ${data.roomId}`)
     // })
     //
-    // socket.on('start_game', (data) => {
-    //     socket.broadcast.to(data.roomId).emit('game_started')
-    //     socket.emit('game_started')
-    //     console.log(`Game started in room: ${data.roomId}`)
-    // })
     //
-    // socket.on('mouse_move', (data) => {
-    //     socket.broadcast.to(data.roomId).emit('opponent_moved', data.y);
-    //     //rooms[data.roomiD]
-    // })
+
+    socket.on('mouse_move', ({y, opponentSocketId}) => {
+        socket.broadcast.to(opponentSocketId).emit('opponent_moved', {y});
+    })
 
 })
 

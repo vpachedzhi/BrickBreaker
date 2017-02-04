@@ -6,12 +6,15 @@ export default class GameField extends Component {
     static propTypes = {
         running: React.PropTypes.bool.isRequired,
         isHost: React.PropTypes.bool.isRequired,
-        opponentY: React.PropTypes.number.isRequired,
-        onMouseMove: React.PropTypes.func.isRequired
+        // opponentY: React.PropTypes.number.isRequired,
+        // onMouseMove: React.PropTypes.func.isRequired
+        socket: React.PropTypes.object.isRequired,
+        opponentSocketId: React.PropTypes.string.isRequired
     }
 
     componentWillReceiveProps(newProps) {
         if(newProps.running) {
+            clearInterval(this.interval)
             this.interval = setInterval(this.draw, 10)
         }
         else
@@ -27,12 +30,17 @@ export default class GameField extends Component {
         this.paddleWidth = this.ballRadius*2
         this.paddleHeight = canvas.height/3
         this.mouseY = canvas.height/3+(this.paddleHeight/2)
+        this.opponentY = 300
         this.ballX = canvas.width/2
         this.ballY = canvas.height-this.ballRadius
         this.dx = 7
         this.dy = -this.dx
         console.log(canvas.width, canvas.height)
         this.draw()
+        this.props.socket.on('opponent_moved', ({y}) => {
+            this.opponentY = y
+        })
+
     }
 
     draw = () => {
@@ -48,21 +56,21 @@ export default class GameField extends Component {
             },
             drawRightPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? this.props.opponentY : this.mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? this.opponentY : this.mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             },
             drawLeftPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(0, (this.props.isHost ? this.mouseY : this.props.opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(0, (this.props.isHost ? this.mouseY : this.opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        //drawBall()
+        drawBall()
         drawRightPaddle()
         drawLeftPaddle()
 
@@ -80,9 +88,9 @@ export default class GameField extends Component {
     }
 
     handleMouseMove = (e) => {
-        // TODO: Emit event to server
         this.mouseY = e.clientY
-        this.props.onMouseMove(this.mouseY)
+        //this.props.onMouseMove(this.mouseY)
+        this.props.socket.emit('mouse_move', {y: this.mouseY, opponentSocketId: this.props.opponentSocketId})
     }
 
 
@@ -91,22 +99,7 @@ export default class GameField extends Component {
             <div className="GameContainer"
                  ref="gameContainer"
                  onMouseMove={this.handleMouseMove}>
-                <canvas ref="canvas" width={1200} height={600} onKeyPress={e => {
-                    switch (e.key) {
-                        case ' sfdsf':
-                            if(this.state.paused){
-                                this.interval = setInterval(this.draw, 10)
-                                this.setState({paused: false})
-                            }
-                            else {
-                                clearInterval(this.interval)
-                                this.setState({paused: true})
-                            }
-                            break
-                        default:
-                            break
-                    }
-                }} tabIndex="1"/>
+                <canvas ref="canvas" width={1200} height={600} tabIndex="1"/>
             </div>
         </div>
     }
