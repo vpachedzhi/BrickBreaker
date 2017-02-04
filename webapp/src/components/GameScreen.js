@@ -5,7 +5,6 @@ import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import debouce from 'debounce'
 import RefreshIndicator from 'material-ui/RefreshIndicator'
 
 export default class GameScreen extends Component {
@@ -17,7 +16,7 @@ export default class GameScreen extends Component {
     state = {
         opponentSocketId: '',
         opponent: '',
-        newMessage: {},
+        newMessage: '',
         guestJoinedOpen: false,
         opponentLeft: false,
         opponentY: 300,
@@ -48,13 +47,12 @@ export default class GameScreen extends Component {
             this.setState({opponentLeft: true})
         })
 
+        this.props.socket.on('message_sent', this.onReceiveMessage)
+
         this.props.socket.on('game_started', () => {
             this.setState({running: true})
         })
 
-        // this.props.socket.on('opponent_moved', ({y}) => {
-        //     this.setState({opponentY: y})
-        // })
     }
 
     onSendMessage = (message) => {
@@ -62,23 +60,18 @@ export default class GameScreen extends Component {
         if(message === 'START' && this.state.opponent){
             this.props.socket.emit('start_game', {roomId: this.state.roomId})
         }
-        else
-            this.props.socket.emit('message_sent', {message, author: this.props.params.name, roomId: this.state.roomId})
+        else {
+            this.props.socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
+        }
     }
 
-    onReceiveMessage = (data) => {
-        this.setState({newMessage: data})
+    onReceiveMessage = (msg) => {
+        this.setState({newMessage: msg})
     }
 
     onOpponentLeft = () => {
         hashHistory.push(`/`)
     }
-
-    // onMouseMove = (y) => {
-    //     if(this.state.running){
-    //         this.props.socket.emit('mouse_move', {y, opponentSocketId: this.state.opponentSocketId})
-    //     }
-    // }
 
     render() {
         const confirmGuestJoined = <FlatButton
@@ -111,8 +104,7 @@ export default class GameScreen extends Component {
                 </div>
                 <div className="GameChat col-md-8 col-md-8 col-sm-8">
                     <GameChat onSendMessage={this.onSendMessage}
-                              newMessage={this.state.newMessage}
-                              name={this.props.params.name}/>
+                              newMessage={this.state.newMessage}/>
                 </div>
             </div>
             <Dialog
@@ -122,7 +114,7 @@ export default class GameScreen extends Component {
                 open={this.state.guestJoinedOpen}
             >
                 You are the host.
-                You can can start the game whenever you want by typing START in the chat.
+                You can can start the game whenever you want by the start button.
                 Good luck !!!
             </Dialog>
             <Dialog

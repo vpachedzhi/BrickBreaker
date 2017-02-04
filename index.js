@@ -64,14 +64,9 @@ io.on('connection', function(socket){
         })
     })
 
-
-
-    //
-    // socket.on('message_sent', (data) => {
-    //     socket.broadcast.to(data.roomId).emit('send_to_room', data)
-    //     socket.emit('send_to_room', data)
-    //     console.log(`${data.author}: ${data.message} in ${data.roomId}`)
-    // })
+    socket.on('message_sent', (data) => {
+        socket.broadcast.to(data.opponentSocketId).emit('message_sent', data.message)
+    })
     //
     //
 
