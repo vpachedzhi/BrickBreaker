@@ -16,7 +16,7 @@ export default class GameScreen extends Component {
     state = {
         opponentSocketId: '',
         opponent: '',
-        newMessage: {},
+        newMessage: '',
         guestJoinedOpen: false,
         opponentLeft: false,
         opponentY: 300,
@@ -35,13 +35,6 @@ export default class GameScreen extends Component {
                     guestJoinedOpen: true
                 })
             })
-            // this.props.socket.on('new_game_created', (roomId) => {
-            //     console.log('you created ' + roomId)
-            //     this.setState({roomId})
-            // })
-            // this.props.socket.on('disconnect', () => {
-            //     this.props.socket.emit('host_disconnected', this.state.roomId)
-            // })
         }
         else { // We are guest here
             const [socketHostId, hostName] = this.props.params.role.split('~')
@@ -53,6 +46,8 @@ export default class GameScreen extends Component {
         this.props.socket.on('opponent_left', () => {
             this.setState({opponentLeft: true})
         })
+
+        this.props.socket.on('message_sent', this.onReceiveMessage)
         //
         // this.props.socket.on('game_started', () => {
         //     this.setState({running: true, hostModalOpen: false, guestModalOpen: false})
@@ -69,12 +64,13 @@ export default class GameScreen extends Component {
         if(message === 'START' && this.state.opponent){
             this.props.socket.emit('start_game', {roomId: this.state.roomId})
         }
-        else
-            this.props.socket.emit('message_sent', {message, author: this.props.params.name, roomId: this.state.roomId})
+        else {
+            this.props.socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
+        }
     }
 
-    onReceiveMessage = (data) => {
-        this.setState({newMessage: data})
+    onReceiveMessage = (msg) => {
+        this.setState({newMessage: msg})
     }
 
     onOpponentLeft = () => {
@@ -116,8 +112,7 @@ export default class GameScreen extends Component {
                 </div>
                 <div className="GameChat col-md-8 col-md-8 col-sm-8">
                     <GameChat onSendMessage={this.onSendMessage}
-                              newMessage={this.state.newMessage}
-                              name={this.props.params.name}/>
+                              newMessage={this.state.newMessage}/>
                 </div>
             </div>
             <Dialog

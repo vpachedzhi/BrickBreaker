@@ -12,7 +12,7 @@ export default class GameChat extends Component {
     }
 
     static propTypes = {
-        newMessage: React.PropTypes.object.isRequired,
+        newMessage: React.PropTypes.string.isRequired,
         onSendMessage: React.PropTypes.func.isRequired
     }
 
@@ -28,14 +28,19 @@ export default class GameChat extends Component {
                 message: ''
             })
             this.props.onSendMessage(ms)
+            this.addToHistory(true, ms)
+        }
+    }
+
+    addToHistory = (meAuthor, message) => {
+        if(message) {
+            this.setState({history: [...this.state.history, {meAuthor, message}]})
+            setTimeout(this.scrollToBottom, 0)
         }
     }
 
     componentWillReceiveProps(nextProps) {
-        if(Object.keys(nextProps.newMessage).length != 0) {
-            this.setState({history: [...this.state.history, nextProps.newMessage]})
-            setTimeout(this.scrollToBottom, 0)
-        }
+        this.addToHistory(false, nextProps.newMessage)
     }
 
     render() {
@@ -47,14 +52,13 @@ export default class GameChat extends Component {
                >
                    <List>
                        {this.state.history.map((data, i) => {
-                           const isAuthor = this.props.name === data.author
                            return <ListItem key={i}
                                             primaryText={
-                                                <span className={isAuthor ? 'MeMsg' : 'OtherMsg'}>
+                                                <span className={data.meAuthor ? 'MeMsg' : 'OtherMsg'}>
                                                     {data.message}
                                                 </span>
                                             }
-                                            style={{textAlign:  isAuthor ? 'right' : 'left'}}
+                                            style={{textAlign:  data.meAuthor ? 'right' : 'left'}}
                                             innerDivStyle={{padding: '6px', borderRadius: '5px'}}
                            />
                        } )}
