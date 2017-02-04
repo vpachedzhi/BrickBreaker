@@ -17,8 +17,7 @@ export default class GameScreen extends Component {
         roomId: '',
         newMessage: {},
         opponent: '',
-        hostModalOpen: false,
-        guestModalOpen: false,
+        guestJoinedOpen: false,
         opponentLeft: false,
         running: false
     }
@@ -35,12 +34,11 @@ export default class GameScreen extends Component {
                 this.props.socket.emit('host_disconnected', this.state.roomId)
             })
         }
-        else {
+        else { // We are gust here
             const {roomId, name} = this.props.params
             this.props.socket.emit('join_game', {roomId, name})
             console.log(name + ', you joined ' + roomId)
             this.state.roomId = roomId
-            this.state.guestModalOpen = true
         }
 
         this.props.socket.on('send_to_room', this.onReceiveMessage.bind(this))
@@ -49,7 +47,7 @@ export default class GameScreen extends Component {
             console.log(`Your opponent is ${userName}`)
             this.setState({opponent: userName})
             if(this.props.params.role === 'host')
-                this.setState({hostModalOpen: true})
+                this.setState({guestJoinedOpen: true})
         })
 
         this.props.socket.on('opponent_left', () => {
@@ -63,7 +61,11 @@ export default class GameScreen extends Component {
 
     onSendMessage = (message) => {
         console.log(`You sent: ${message}`)
-        this.props.socket.emit('message_sent', {message, author: this.props.params.name, roomId: this.state.roomId})
+        if(message === 'START' && this.state.opponent){
+            this.props.socket.emit('start_game', {roomId: this.state.roomId})
+        }
+        else
+            this.props.socket.emit('message_sent', {message, author: this.props.params.name, roomId: this.state.roomId})
     }
 
     onReceiveMessage = (data) => {
@@ -78,13 +80,11 @@ export default class GameScreen extends Component {
     }
 
     render() {
-        const actions = [
-            <FlatButton
-                label="Start game"
-                primary={true}
-                onClick={() => this.props.socket.emit('start_game', {roomId: this.state.roomId})}
-            />,
-        ];
+        const confirmGuestJoined = <FlatButton
+            label="Ok"
+            primary={true}
+            onClick={() => this.setState({guestJoinedOpen: false})}
+        />
         const action = <FlatButton
             label="Go to start screen"
             primary={true}
@@ -106,26 +106,14 @@ export default class GameScreen extends Component {
                 </div>
             </div>
             <Dialog
-                title={`${this.state.opponent} want to play with you`}
-                actions={actions}
+                title={`${this.state.opponent} joined you`}
+                actions={confirmGuestJoined}
                 modal={false}
-                open={this.state.hostModalOpen}
+                open={this.state.guestJoinedOpen}
             >
                 You are the host.
-                You can can start the game whenever you want.
+                You can can start the game whenever you want by the start button.
                 Good luck !!!
-            </Dialog>
-            <Dialog
-                title={`Please wait until ${this.state.opponent} start the game`}
-                modal={false}
-                open={this.state.guestModalOpen}
-            >
-                <RefreshIndicator
-                    size={50}
-                    left={50}
-                    top={50}
-                    status="loading"
-                />
             </Dialog>
             <Dialog
                 actions={[action]}
