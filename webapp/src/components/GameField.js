@@ -104,8 +104,10 @@ export default class GameField extends Component {
 
     handleMouseMove = (e) => {
         this.mouseY = e.clientY
-        //this.props.onMouseMove(this.mouseY)
-        this.props.socket.emit('mouse_move', {y: this.mouseY, opponentSocketId: this.props.opponentSocketId})
+        this.props.socket.emit('mouse_move', {
+            y: this.mouseY,
+            hostSocketId: this.state.isHost ? this.props.socket.id : this.props.opponentSocketId
+        })
     }
 
 
