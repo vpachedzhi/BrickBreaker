@@ -15,9 +15,9 @@ export default class GameField extends Component {
             clearInterval(this.interval)
             this.interval = setInterval(this.draw, 10)
         }
-        else
+        else {
             clearInterval(this.interval)
-
+        }
     }
 
     componentDidMount() {
@@ -37,6 +37,10 @@ export default class GameField extends Component {
             this.opponentY = y
         })
 
+    }
+
+    componentWillUnmount() {
+        clearInterval(this.interval)
     }
 
     draw = () => {
@@ -71,12 +75,14 @@ export default class GameField extends Component {
         drawLeftPaddle()
 
         if(ballX + dx > canvas.width-ballRadius - paddleWidth) { // When ball is on the right side
-
+            if(!this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
+                ee.emit('BALL_MISS')
+            }
             this.dx = -dx;
             ee.emit('BALL_HIT')
         } else if(ballX + dx < ballRadius + paddleWidth) { // When ball is on the left side
             if(this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
-                console.log("HOST: BOOOOM")
+                ee.emit('BALL_MISS')
             }
             this.dx = -dx;
             ee.emit('BALL_HIT')

@@ -5,6 +5,7 @@ import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
+import ee from '../utils/eventEmitter'
 
 export default class GameScreen extends Component {
 
@@ -19,12 +20,13 @@ export default class GameScreen extends Component {
         guestJoinedOpen: false,
         opponentLeft: false,
         opponentY: 300,
-        running: false
+        running: false,
+        isHost: this.props.params.role === 'host'
     }
 
     constructor(props) {
         super(props)
-        if(this.props.params.role === 'host') {
+        if(this.state.isHost) {
             this.props.socket.emit('create_game', {name: props.params.name})
             this.props.socket.on('opponent_joined', data => {
                 this.setState({
@@ -51,10 +53,12 @@ export default class GameScreen extends Component {
             this.setState({running: true})
         })
 
+        ee.on('BALL_MISS', this.onBallMissed)
+
     }
 
     onSendMessage = (message) => {
-        if(message === 'START' && this.props.params.role === 'host' && this.state.opponent){
+        if(message === 'START' && this.state.isHost && this.state.opponent){
             this.props.socket.emit('start_game', {opponentSocketId: this.state.opponentSocketId})
         }
         else {
@@ -64,10 +68,24 @@ export default class GameScreen extends Component {
 
     onReceiveMessage = (msg) => {
         this.setState({newMessage: msg})
+        this.setState({newMessage: ''})
     }
 
     onOpponentLeft = () => {
         hashHistory.push(`/`)
+        this.props.socket.emit('request_update');
+    }
+
+    onBallMissed = () => {
+        this.props.socket.emit('ball_missed', {
+            hostSocketId: this.state.isHost ? this.props.socket.id : this.state.opponentSocketId
+        })
+    }
+
+    componentWillUnmount() {
+        this.props.socket.off('message_sent')
+        this.props.socket.off('opponent_left')
+        this.props.socket.off('opponent_joined')
     }
 
     render() {
@@ -84,7 +102,7 @@ export default class GameScreen extends Component {
         return <div className="GameScreen">
             <GameField running={this.state.running}
                        opponentY={this.state.opponentY}
-                       isHost={this.props.params.role === 'host'}
+                       isHost={this.state.isHost}
                        opponentSocketId={this.state.opponentSocketId}
                        socket={this.props.socket}
             />

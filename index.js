@@ -16,7 +16,7 @@ io.on('connection', function(socket){
 
     console.log(`${socket.id} connected`)
 
-    socket.emit('rooms_list_update', getGames())
+    sendUpdate(socket)
 
     socket.on('create_game', (data) => {
         games[socket.id] = {
@@ -66,15 +66,29 @@ io.on('connection', function(socket){
 
     socket.on('message_sent', (data) => {
         socket.broadcast.to(data.opponentSocketId).emit('message_sent', data.message)
+        console.log(data.message)
     })
-    //
-    //
 
     socket.on('mouse_move', ({y, opponentSocketId}) => {
         socket.broadcast.to(opponentSocketId).emit('opponent_moved', {y});
     })
 
+    socket.on('ball_missed', (data) => {
+        const game = games[data.hostSocketId]
+        if(socket.id === data.hostSocketId) {
+            console.log("Host ", data.hostSocketId, " missed ball")
+        } else {
+            console.log("Guest ", socket.id, " missed ball")
+        }
+    })
+
+    socket.on('request_update', () => sendUpdate(socket))
+
 })
+
+const sendUpdate = (socket) => {
+    socket.emit('rooms_list_update', getGames())
+}
 
 const notifyUpdate = () => {
     io.emit('rooms_list_update', getGames())

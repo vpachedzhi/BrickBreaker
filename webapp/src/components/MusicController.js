@@ -38,7 +38,7 @@ export default class MusicController extends Component {
     }
 
     componentDidMount() {
-        //this.refs.music_audio.play()
+        // TODO: this.refs.music_audio.play()
         this.refs.music_audio.volume = this.state.volume
         ee.on('BALL_HIT', this.playPow)
     }
