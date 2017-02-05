@@ -1,3 +1,4 @@
+const {canvas, ballRadius, paddle} = require('./webapp/config')
 const express = require('express')
 const path = require('path')
 const app = express()
@@ -20,7 +21,7 @@ io.on('connection', function(socket){
 
     // HOST SOCKET
     socket.on('create_game', (data) => {
-        games[socket.id] = Game()
+        games[socket.id] = new Game(data.name, socket)
         notifyAllUpdate()
         console.log('Game created by ' + socket.id, games)
 
@@ -37,9 +38,8 @@ io.on('connection', function(socket){
             console.log(`${socket.id} disconnected`)
         })
 
-        socket.on('start_game', ({opponentSocketId}) => {
-            let game = games[socket.id]
-            game.start()
+        socket.on('start_game', () => {
+            games[socket.id].start()
         })
     })
 
@@ -50,7 +50,6 @@ io.on('connection', function(socket){
         const {socketHostId, name} = data
         let game = games[socketHostId]
         game.guestName = name
-        game.guestSocket.id = socket.id
         game.guestSocket = socket
         notifyAllUpdate()
         socket.broadcast.to(data.socketHostId).emit('opponent_joined', {socketGuestId:socket.id, name})
@@ -67,7 +66,7 @@ io.on('connection', function(socket){
     })
 
     socket.on('mouse_move', ({y, hostSocketId}) => {
-        games[hostSocketId].processMouseInput(socket, y)
+        if(games[hostSocketId]) games[hostSocketId].processMouseInput(socket, y)
     })
 
     socket.on('ball_missed', (data) => {
@@ -103,84 +102,61 @@ const getGames = () => {
         })
 }
 
-const sendGameState = (socket) => {
-
-}
-
-const Game = (hostName, socket) => {
-    return {
-        hostName: data.name,
-        hostSocket: socket,
-        guestName: '',
-        guestSocket: undefined,
-        state: {
-            ballX: 600,
-            ballY: 590,
+class Game  {
+    constructor (hostName, socket) {
+        this.hostName = hostName
+        this.hostSocket = socket
+        this.guestName = ''
+        this.guestSocket = undefined
+        this.state = {
+            ballX: canvas.width/2,
+            ballY: canvas.height-ballRadius,
             dx: 7,
-            dy: -7
-        },
-        processMouseInput: (socket, y) => {
-            if(socket === this.hostSocket) {
-                this.guestSocket.emit('opponent_moved', {y})
-            } else {
-                this.hostSocket.emit('opponent_moved', {y})
-            }
-        },
-        start: () => {
-            this.guestSocket.emit('game_started')
-            this.hostSocket.emit('game_started')
-            const {hostName, guestName} = games[socket.id]
-            console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
-
-            const generateNewState = (oldState) => {
-                const {ballX, ballY, dx, dy} = oldState,
-                    canvas = {
-                        width: 1200,
-                        height: 600
-                    },
-                    ballRadius = 10,
-                    paddleWidth = 20,
-                    paddleHeight = 200
-
-                let newState = {
-                    ballX,
-                    ballY,
-                    dx,
-                    dy
-                }
-
-
-                if(ballX + dx > canvas.width-ballRadius - paddleWidth || ballX + dx < ballRadius + paddleWidth) { // When ball is on the right side
-                    newState.dx = -dx;
-                }
-
-                if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
-                    newState.dy = -dy;
-                }
-
-
-                newState.ballX += newState.dx
-                newState.ballY += newState.dy
-
-                return newState
-            }
-
-            let interval = setInterval(() => {
-                const newState = generateNewState(games[socket.id].state)
-                socket.broadcast.to(opponentSocketId).emit('new_game_state', newState)
-                socket.emit('new_game_state', newState)
-                games[socket.id].state = newState
-            }, 10)
-
-            setTimeout(() => {
-                clearInterval(interval)
-            }, 60000)
-
-            const {hostName, guestName} = games[socket.id]
-            console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
-
-
+            dy: -7,
+            hostY: canvas.height/2,
+            guestY: canvas.height/2
         }
+    }
+
+    processMouseInput(socket, y) {
+        if(socket === this.hostSocket) {
+            this.state.hostY = y
+        } else {
+            this.state.guestY = y
+        }
+    }
+
+    mutateState() {
+
+        if(this.state.ballX + this.state.dx > canvas.width-ballRadius - paddle.width
+            || this.state.ballX + this.state.dx < ballRadius + paddle.width) {
+            this.state.dx = -this.state.dx;
+        }
+
+        if(this.state.ballY + this.state.dy > canvas.height-ballRadius || this.state.ballY + this.state.dy < ballRadius) {
+            this.state.dy = -this.state.dy;
+        }
+
+        this.state.ballX += this.state.dx
+        this.state.ballY += this.state.dy
+    }
+
+    start() {
+        this.guestSocket.emit('game_started')
+        this.hostSocket.emit('game_started')
+        const {hostName, guestName} = this
+        let interval = setInterval(() => {
+            this.mutateState()
+            this.hostSocket.emit('new_game_state', this.state)
+            this.guestSocket.emit('new_game_state', this.state)
+        }, 10)
+
+        setTimeout(() => {
+            clearInterval(interval)
+        }, 60000)
+
+
+        console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
     }
 }
 

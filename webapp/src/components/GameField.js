@@ -1,6 +1,5 @@
 import React, {Component} from 'react'
-import ee from '../utils/eventEmitter'
-
+import {canvas, ballRadius, paddle} from '../../config'
 export default class GameField extends Component {
 
     static propTypes = {
@@ -22,24 +21,21 @@ export default class GameField extends Component {
 
     componentDidMount() {
 
-        const canvas = this.refs.canvas
-        this.ballRadius = canvas.width/120
-        this.paddleWidth = this.ballRadius*2
-        this.paddleHeight = canvas.height/3
-        this.mouseY = canvas.height/3+(this.paddleHeight/2)
-        this.opponentY = 300
-        this.ballX = canvas.width/2
-        this.ballY = canvas.height-this.ballRadius
-        this.dx = 7
-        this.dy = -this.dx
+        this.gameState = {
+            ballX: canvas.width/2,
+            ballY: canvas.height-ballRadius,
+            hostY: canvas.height/2,
+            guestY: canvas.height/2,
+
+        }
+
         this.draw()
         this.props.socket.on('opponent_moved', ({y}) => {
             this.opponentY = y
         })
 
         this.props.socket.on('new_game_state', newState => {
-            this.ballX = newState.ballX
-            this.ballY = newState.ballY
+            this.gameState = newState
         })
 
     }
@@ -49,9 +45,9 @@ export default class GameField extends Component {
     }
 
     draw = () => {
-        const canvas = this.refs.canvas,
-            ctx = canvas.getContext('2d'),
-            {ballRadius, paddleWidth, paddleHeight, ballX, ballY, dx, dy, mouseY, opponentY} = this
+        const canvasRef = this.refs.canvas,
+            ctx = canvasRef.getContext('2d'),
+            {ballX, ballY, hostY, guestY} = this.gameState
         const drawBall = () => {
                 ctx.beginPath();
                 ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
@@ -61,14 +57,14 @@ export default class GameField extends Component {
             },
             drawRightPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(canvas.width-paddleWidth, (this.props.isHost ? opponentY : mouseY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(canvas.width-paddle.width, guestY-(paddle.height/2), paddle.width, paddle.height);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
             },
             drawLeftPaddle = () => {
                 ctx.beginPath();
-                ctx.rect(0, (this.props.isHost ? mouseY :opponentY)-(paddleHeight/2), paddleWidth, paddleHeight);
+                ctx.rect(0, hostY-(paddle.height/2), paddle.width, paddle.height);
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
@@ -78,36 +74,15 @@ export default class GameField extends Component {
         drawBall()
         drawRightPaddle()
         drawLeftPaddle()
-
-        // if(ballX + dx > canvas.width-ballRadius - paddleWidth) { // When ball is on the right side
-        //     if(!this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
-        //         ee.emit('BALL_MISS')
-        //     }
-        //     this.dx = -dx;
-        //     ee.emit('BALL_HIT')
-        // } else if(ballX + dx < ballRadius + paddleWidth) { // When ball is on the left side
-        //     if(this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
-        //         ee.emit('BALL_MISS')
-        //     }
-        //     this.dx = -dx;
-        //     ee.emit('BALL_HIT')
-        // }
-        //
-        // if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
-        //     this.dy = -dy;
-        //     ee.emit('BALL_HIT')
-        // }
-        //
-        // this.ballX += dx;
-        // this.ballY += dy;
     }
 
     handleMouseMove = (e) => {
-        this.mouseY = e.clientY
-        this.props.socket.emit('mouse_move', {
-            y: this.mouseY,
-            hostSocketId: this.state.isHost ? this.props.socket.id : this.props.opponentSocketId
-        })
+        if (this.props.running) {
+            this.props.socket.emit('mouse_move', {
+                y: e.clientY,
+                hostSocketId: this.props.isHost ? this.props.socket.id : this.props.opponentSocketId
+            })
+        }
     }
 
 
@@ -116,7 +91,7 @@ export default class GameField extends Component {
             <div className="GameContainer"
                  ref="gameContainer"
                  onMouseMove={this.handleMouseMove}>
-                <canvas ref="canvas" width={1200} height={600} tabIndex="1"/>
+                <canvas ref="canvas" width={canvas.width} height={canvas.height} tabIndex="1"/>
             </div>
         </div>
     }
