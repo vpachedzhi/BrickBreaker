@@ -22,7 +22,13 @@ io.on('connection', function(socket){
         games[socket.id] = {
             hostName: data.name,
             guestName: '',
-            guestSocketId: ''
+            guestSocketId: '',
+            state: {
+                ballX: 600,
+                ballY: 590,
+                dx: 7,
+                dy: -7
+            }
         }
         notifyUpdate()
         console.log('Game created by ' + socket.id, games)
@@ -43,6 +49,51 @@ io.on('connection', function(socket){
         socket.on('start_game', ({opponentSocketId}) => {
             socket.broadcast.to(opponentSocketId).emit('game_started')
             socket.emit('game_started')
+
+            const generateNewState = (oldState) => {
+                const {ballX, ballY, dx, dy} = oldState,
+                    canvas = {
+                        width: 1200,
+                        height: 600
+                    },
+                    ballRadius = 10,
+                    paddleWidth = 20,
+                    paddleHeight = 200
+
+                let newState = {
+                    ballX,
+                    ballY,
+                    dx,
+                    dy
+                }
+
+
+                if(ballX + dx > canvas.width-ballRadius - paddleWidth || ballX + dx < ballRadius + paddleWidth) { // When ball is on the right side
+                    newState.dx = -dx;
+                }
+
+                if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
+                    newState.dy = -dy;
+                }
+
+
+                newState.ballX += newState.dx
+                newState.ballY += newState.dy
+
+                return newState
+            }
+
+            let interval = setInterval(() => {
+                const newState = generateNewState(games[socket.id].state)
+                socket.broadcast.to(opponentSocketId).emit('new_game_state', newState)
+                socket.emit('new_game_state', newState)
+                games[socket.id].state = newState
+            }, 10)
+
+            setTimeout(() => {
+                clearInterval(interval)
+            }, 60000)
+
             const {hostName, guestName} = games[socket.id]
             console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
         })

@@ -37,6 +37,11 @@ export default class GameField extends Component {
             this.opponentY = y
         })
 
+        this.props.socket.on('new_game_state', newState => {
+            this.ballX = newState.ballX
+            this.ballY = newState.ballY
+        })
+
     }
 
     componentWillUnmount() {
@@ -74,27 +79,27 @@ export default class GameField extends Component {
         drawRightPaddle()
         drawLeftPaddle()
 
-        if(ballX + dx > canvas.width-ballRadius - paddleWidth) { // When ball is on the right side
-            if(!this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
-                ee.emit('BALL_MISS')
-            }
-            this.dx = -dx;
-            ee.emit('BALL_HIT')
-        } else if(ballX + dx < ballRadius + paddleWidth) { // When ball is on the left side
-            if(this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
-                ee.emit('BALL_MISS')
-            }
-            this.dx = -dx;
-            ee.emit('BALL_HIT')
-        }
-
-        if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
-            this.dy = -dy;
-            ee.emit('BALL_HIT')
-        }
-
-        this.ballX += dx;
-        this.ballY += dy;
+        // if(ballX + dx > canvas.width-ballRadius - paddleWidth) { // When ball is on the right side
+        //     if(!this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
+        //         ee.emit('BALL_MISS')
+        //     }
+        //     this.dx = -dx;
+        //     ee.emit('BALL_HIT')
+        // } else if(ballX + dx < ballRadius + paddleWidth) { // When ball is on the left side
+        //     if(this.props.isHost && (ballY < mouseY - paddleHeight/2 || ballY > mouseY + paddleHeight/2)) {
+        //         ee.emit('BALL_MISS')
+        //     }
+        //     this.dx = -dx;
+        //     ee.emit('BALL_HIT')
+        // }
+        //
+        // if(ballY + dy > canvas.height-ballRadius || ballY + dy < ballRadius) {
+        //     this.dy = -dy;
+        //     ee.emit('BALL_HIT')
+        // }
+        //
+        // this.ballX += dx;
+        // this.ballY += dy;
     }
 
     handleMouseMove = (e) => {
