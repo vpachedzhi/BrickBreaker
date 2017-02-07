@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import {canvas, ballRadius, paddle} from '../../config'
+import ee from '../utils/eventEmitter'
 export default class GameField extends Component {
 
     static propTypes = {
@@ -25,8 +26,7 @@ export default class GameField extends Component {
             ballX: canvas.width/2,
             ballY: canvas.height-ballRadius,
             hostY: canvas.height/2,
-            guestY: canvas.height/2,
-
+            guestY: canvas.height/2
         }
 
         this.draw()
@@ -36,6 +36,10 @@ export default class GameField extends Component {
 
         this.props.socket.on('new_game_state', newState => {
             this.gameState = newState
+
+            if (newState.ballCollided) {
+                ee.emit('BALL_HIT')
+            }
         })
 
     }

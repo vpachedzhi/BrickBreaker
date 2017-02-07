@@ -114,7 +114,8 @@ class Game  {
             dx: 7,
             dy: -7,
             hostY: canvas.height/2,
-            guestY: canvas.height/2
+            guestY: canvas.height/2,
+            ballCollided: false
         }
     }
 
@@ -127,14 +128,17 @@ class Game  {
     }
 
     mutateState() {
+        this.state.ballCollided = false
 
         if(this.state.ballX + this.state.dx > canvas.width-ballRadius - paddle.width
             || this.state.ballX + this.state.dx < ballRadius + paddle.width) {
-            this.state.dx = -this.state.dx;
+            this.state.dx = -this.state.dx
+            this.state.ballCollided = true
         }
 
         if(this.state.ballY + this.state.dy > canvas.height-ballRadius || this.state.ballY + this.state.dy < ballRadius) {
-            this.state.dy = -this.state.dy;
+            this.state.dy = -this.state.dy
+            this.state.ballCollided = true
         }
 
         this.state.ballX += this.state.dx
@@ -159,5 +163,10 @@ class Game  {
         console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
     }
 }
+
+// TODO: 1. notify when someone misses
+//       2. Change dY depending on where paddle is hit
+//       3. Spawn bricks
+//       4.
 
 
