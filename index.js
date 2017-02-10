@@ -23,7 +23,7 @@ io.on('connection', function(socket){
     socket.on('create_game', (data) => {
         games[socket.id] = new Game(data.name, socket)
         notifyAllUpdate()
-        console.log('Game created by ' + socket.id, games)
+        console.log('Game created by ' + socket.id)
 
         socket.on('disconnect', () => {
             const game = games[socket.id]
@@ -39,7 +39,10 @@ io.on('connection', function(socket){
         })
 
         socket.on('start_game', () => {
-            games[socket.id].start()
+            let game = games[socket.id]
+            if(game) {
+                game.start()
+            }
         })
     })
 
@@ -62,20 +65,10 @@ io.on('connection', function(socket){
 
     socket.on('message_sent', (data) => {
         socket.broadcast.to(data.opponentSocketId).emit('message_sent', data.message)
-        console.log(data.message)
     })
 
     socket.on('mouse_move', ({y, hostSocketId}) => {
         if(games[hostSocketId]) games[hostSocketId].processMouseInput(socket, y)
-    })
-
-    socket.on('ball_missed', (data) => {
-        const game = games[data.hostSocketId]
-        if(socket.id === data.hostSocketId) {
-            console.log("Host ", data.hostSocketId, " missed ball")
-        } else {
-            console.log("Guest ", socket.id, " missed ball")
-        }
     })
 
     socket.on('request_update', () => sendListUpdate(socket))
@@ -111,12 +104,23 @@ class Game  {
         this.state = {
             ballX: canvas.width/2,
             ballY: canvas.height-ballRadius,
-            dx: 7,
-            dy: -7,
+            dx: 7, // TODO get out
+            dy: -7, // TODO
             hostY: canvas.height/2,
             guestY: canvas.height/2,
             ballCollided: false
         }
+
+        this.score = {
+            hostScore: 0,
+            hostLives: 3, // TODO : constant
+            guestScore: 0,
+            guestLives: 3 // TODO : constant
+        }
+
+        this.running = false
+        this.engineInterval = undefined
+        this.gamePhase = 10  // TODO : constant
     }
 
     processMouseInput(socket, y) {
@@ -130,8 +134,23 @@ class Game  {
     mutateState() {
         this.state.ballCollided = false
 
-        if(this.state.ballX + this.state.dx > canvas.width-ballRadius - paddle.width
-            || this.state.ballX + this.state.dx < ballRadius + paddle.width) {
+        if(this.state.ballX + this.state.dx > canvas.width - ballRadius - paddle.width) {
+            // GUEST side right
+            if(this.state.ballY < this.state.guestY - paddle.height/2
+                || this.state.ballY > this.state.guestY + paddle.height/2) {
+
+            }
+
+            this.state.dx = -this.state.dx
+            this.state.ballCollided = true
+        }
+        else if(this.state.ballX + this.state.dx < ballRadius + paddle.width) {
+            // HOST side left
+            if(this.state.ballY < this.state.hostY - paddle.height/2
+                || this.state.ballY > this.state.hostY + paddle.height/2) {
+
+            }
+
             this.state.dx = -this.state.dx
             this.state.ballCollided = true
         }
@@ -146,21 +165,34 @@ class Game  {
     }
 
     start() {
+        this.running = true
         this.guestSocket.emit('game_started')
         this.hostSocket.emit('game_started')
-        const {hostName, guestName} = this
-        let interval = setInterval(() => {
-            this.mutateState()
-            this.hostSocket.emit('new_game_state', this.state)
-            this.guestSocket.emit('new_game_state', this.state)
-        }, 10)
+
+        this.run()
 
         setTimeout(() => {
-            clearInterval(interval)
-        }, 60000)
+            this.running = false
 
+            // TODO: EMIT GAME ENDED
 
-        console.log(`Game started between:\nHost: ${hostName}\nGuest: ${guestName}`)
+        }, 600000)
+    }
+
+    run() {
+        clearInterval(this.engineInterval)
+        if(this.running) {
+            this.engineInterval = setInterval(() => {
+                this.mutateState()
+                this.hostSocket.emit('new_game_state', this.state)
+                this.guestSocket.emit('new_game_state', this.state)
+            }, this.gamePhase)
+
+            if(this.gamePhase > 6) { // no less than 5ms
+                this.gamePhase--
+            }
+            setInterval(() => this.run(), 30000) // On every 30sec, game speeds up !
+        }
     }
 }
 

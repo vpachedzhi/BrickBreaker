@@ -7,7 +7,7 @@ export default class GameField extends Component {
         running: React.PropTypes.bool.isRequired,
         isHost: React.PropTypes.bool.isRequired,
         socket: React.PropTypes.object.isRequired,
-        opponentSocketId: React.PropTypes.string.isRequired
+        onMouseMove: React.PropTypes.func.isRequired
     }
 
     componentWillReceiveProps(newProps) {
@@ -30,9 +30,6 @@ export default class GameField extends Component {
         }
 
         this.draw()
-        this.props.socket.on('opponent_moved', ({y}) => {
-            this.opponentY = y
-        })
 
         this.props.socket.on('new_game_state', newState => {
             this.gameState = newState
@@ -80,21 +77,11 @@ export default class GameField extends Component {
         drawLeftPaddle()
     }
 
-    handleMouseMove = (e) => {
-        if (this.props.running) {
-            this.props.socket.emit('mouse_move', {
-                y: e.clientY,
-                hostSocketId: this.props.isHost ? this.props.socket.id : this.props.opponentSocketId
-            })
-        }
-    }
-
-
     render() {
         return <div className="GameField" >
             <div className="GameContainer"
                  ref="gameContainer"
-                 onMouseMove={this.handleMouseMove}>
+                 onMouseMove={this.props.onMouseMove}>
                 <canvas ref="canvas" width={canvas.width} height={canvas.height} tabIndex="1"/>
             </div>
         </div>

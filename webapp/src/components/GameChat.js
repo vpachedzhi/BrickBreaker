@@ -68,6 +68,7 @@ export default class GameChat extends Component {
            <div className="row" style={{height: '40%'}}>
                <div className="col-md-10 col-sm-10">
                    <TextField
+                       autoFocus
                        hintText="Write your message..."
                        onChange={(e) => this.setState({message: e.target.value})}
                        value={this.state.message}

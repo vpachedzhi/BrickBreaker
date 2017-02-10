@@ -59,16 +59,18 @@ export default class StartScreen extends Component {
                 <div className="col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
                     <div className="row">
                         <div className="col-md-6">
-                            <TextField hintText="Enter username"
-                                       maxLength="12"
-                                       value={this.state.username}
-                                       onChange={(e) => this.onTextChange(e.target.value)}
-                                       errorText={this.state.errorText}
-                                       fullWidth={true}
-                                       onKeyPress={(e)=>  {
-                                           if (e.key === 'Enter')
-                                               this.onCreateGame()
-                                       }}
+                            <TextField
+                                autoFocus
+                                hintText="Enter username"
+                                maxLength="12"
+                                value={this.state.username}
+                                onChange={(e) => this.onTextChange(e.target.value)}
+                                errorText={this.state.errorText}
+                                fullWidth={true}
+                                onKeyPress={(e)=>  {
+                                   if (e.key === 'Enter')
+                                       this.onCreateGame()
+                                }}
                             />
                         </div>
                         <div className="col-md-6">

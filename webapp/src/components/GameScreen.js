@@ -53,13 +53,11 @@ export default class GameScreen extends Component {
             this.setState({running: true})
         })
 
-        ee.on('BALL_MISS', this.onBallMissed)
-
     }
 
     onSendMessage = (message) => {
         if(message === 'START' && this.state.isHost && this.state.opponent){
-            this.props.socket.emit('start_game', {opponentSocketId: this.state.opponentSocketId})
+            this.props.socket.emit('start_game')
         }
         else {
             this.props.socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
@@ -76,20 +74,25 @@ export default class GameScreen extends Component {
         this.props.socket.emit('request_update');
     }
 
-    onBallMissed = () => {
-        this.props.socket.emit('ball_missed', {
-            hostSocketId: this.state.isHost ? this.props.socket.id : this.state.opponentSocketId
-        })
+    onMouseMove = (e) => {
+        if (this.state.running) {
+            this.props.socket.emit('mouse_move', {
+                y: e.clientY,
+                hostSocketId: this.state.isHost ? this.props.socket.id : this.state.opponentSocketId
+            })
+        }
     }
 
     componentWillUnmount() {
         this.props.socket.off('message_sent')
         this.props.socket.off('opponent_left')
         this.props.socket.off('opponent_joined')
+        this.props.socket.off('game_started')
     }
 
     render() {
         const confirmGuestJoined = <FlatButton
+            autoFocus
             label="Ok"
             primary={true}
             onClick={() => this.setState({guestJoinedOpen: false})}
@@ -105,6 +108,7 @@ export default class GameScreen extends Component {
                        isHost={this.state.isHost}
                        opponentSocketId={this.state.opponentSocketId}
                        socket={this.props.socket}
+                       onMouseMove={this.onMouseMove}
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
