@@ -69,7 +69,16 @@ body {
     word-wrap: break-word;
 }
 
-/* Below CSS is for vertical scrollbars */
+/* PauseProgress */
+
+.PauseProgress {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* Below CSS is for vertical scrolls */
 
 ::-webkit-scrollbar
 {

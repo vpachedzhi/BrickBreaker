@@ -5,7 +5,7 @@ import GameField from "./GameField"
 import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
-import ee from '../utils/eventEmitter'
+import PauseProgress from './PauseProgress'
 
 export default class GameScreen extends Component {
 
@@ -21,6 +21,8 @@ export default class GameScreen extends Component {
         opponentLeft: false,
         opponentY: 300,
         running: false,
+        gameStatus: '',
+        pauseProgress: -1,
         isHost: this.props.params.role === 'host'
     }
 
@@ -50,9 +52,16 @@ export default class GameScreen extends Component {
         this.props.socket.on('message_sent', this.onReceiveMessage)
 
         this.props.socket.on('game_started', () => {
-            this.setState({running: true})
+            this.setState({running: true, pauseProgress: -1})
         })
 
+        this.props.socket.on('pause_progress', pauseProgress => {
+            this.setState({running: false, pauseProgress})
+        })
+
+        this.props.socket.on('game_ended', gameStatus => {
+            this.setState({gameStatus})
+        })
     }
 
     onSendMessage = (message) => {
@@ -69,7 +78,7 @@ export default class GameScreen extends Component {
         this.setState({newMessage: ''})
     }
 
-    onOpponentLeft = () => {
+    onGameEnd = () => {
         hashHistory.push(`/`)
         this.props.socket.emit('request_update');
     }
@@ -88,6 +97,8 @@ export default class GameScreen extends Component {
         this.props.socket.off('opponent_left')
         this.props.socket.off('opponent_joined')
         this.props.socket.off('game_started')
+        this.props.socket.off('pause_progress')
+        this.props.socket.off('game_ended')
     }
 
     render() {
@@ -100,7 +111,7 @@ export default class GameScreen extends Component {
         const action = <FlatButton
             label="Go to start screen"
             primary={true}
-            onTouchTap={this.onOpponentLeft}
+            onTouchTap={this.onGameEnd}
         />
         return <div className="GameScreen">
             <GameField running={this.state.running}
@@ -112,8 +123,10 @@ export default class GameScreen extends Component {
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
-                    <ScoreBoard myName={this.props.params.name} myScore={0}
-                                otherName={this.state.opponent} otherScore={0}>
+                    <ScoreBoard myName={this.props.params.name}
+                                otherName={this.state.opponent}
+                                socket={this.props.socket}
+                                isHost={this.state.isHost}>
                         {this.props.children}
                     </ScoreBoard>
                 </div>
@@ -129,17 +142,25 @@ export default class GameScreen extends Component {
                 open={this.state.guestJoinedOpen}
             >
                 You are the host.
-                You can can start the game whenever you want by the start button.
+                You can can start the game whenever you want by writing "START" in the chat.
                 Good luck !!!
             </Dialog>
             <Dialog
                 actions={[action]}
                 modal={false}
                 open={this.state.opponentLeft}
-                onRequestClose={this.onOpponentLeft}
+                onRequestClose={this.onGameEnd}
             >
                 {this.state.opponent} left the game!
             </Dialog>
+            <Dialog
+                open={this.state.gameStatus !== ''}
+                onRequestClose={this.onGameEnd}
+                modal={false}
+            >
+                {this.state.gameStatus === 'won' ? 'Congrats! You won!' : 'You lost... Better luck next time.'}
+            </Dialog>
+            <PauseProgress pauseProgress={this.state.pauseProgress}/>
         </div>
     }
 }
