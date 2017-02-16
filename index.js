@@ -211,9 +211,9 @@ class GameEngine  {
                 let b = bricks[c][r]
                 if(b.status) {
 
-                    if(ballX > b.x && ballX < b.x + brickWidth) {
-                        if((b.y + brickHeight < ballY && ballY + dy < b.y + brickHeight) ||
-                            (b.y > ballY && ballY + dy > b.y)){
+                    if(ballX > b.x - ballRadius && ballX < b.x + brickWidth + ballRadius) {
+                        if((b.y + brickHeight < ballY - ballRadius && ballY - ballRadius + dy < b.y + brickHeight) ||
+                            (b.y > ballY + ballRadius && ballY + ballRadius + dy > b.y)){
                             this.state.dy = -dy
                             b.status = false
                             this.state.ballCollided = true
@@ -223,9 +223,9 @@ class GameEngine  {
 
                     }
 
-                    if(ballY > b.y && ballY < b.y + brickHeight) {
-                        if((b.x + brickWidth < ballX && ballX + dx < b.x + brickWidth) ||
-                            (b.x > ballX && ballX + dx > b.x)){
+                    if(ballY > b.y - ballRadius && ballY < b.y + brickHeight + ballRadius) {
+                        if((b.x + brickWidth < ballX + ballRadius && ballX - ballRadius + dx < b.x + brickWidth) ||
+                            (b.x > ballX + ballRadius && ballX + ballRadius + dx > b.x)){
                             this.state.dx = -dx
                             b.status = false
                             this.state.ballCollided = true
@@ -376,8 +376,4 @@ class GameEngine  {
         delete this.allGames[this.hostSocket.id]
     }
 }
-
-// TODO: 2. Change dY depending on where paddle is hit
-//       3. Spawn bricks
-
 

@@ -14,7 +14,7 @@ const brickRowCount = 6;
 const brickColumnCount = 10;
 const brickWidth = 60;
 const brickHeight = 30;
-const brickPadding = 0;
+const brickPadding = 2;
 const brickOffsetTop = (canvas.height - brickRowCount * (brickHeight + brickPadding)) / 2;
 const brickOffsetLeft = (canvas.width - brickColumnCount * (brickWidth + brickPadding)) / 2;
 
