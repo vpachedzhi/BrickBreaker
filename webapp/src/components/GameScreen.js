@@ -138,6 +138,7 @@ export default class GameScreen extends Component {
             <Dialog
                 title={`${this.state.opponent} joined you`}
                 actions={confirmGuestJoined}
+                autoFocus
                 modal={false}
                 open={this.state.guestJoinedOpen}
             >

@@ -72,9 +72,9 @@ io.on('connection', function(socket){
             socket.on('disconnect', () => {
                 if(games[socketHostId]){
                     games[socketHostId].stop()
+                    delete games[socketHostId]
+                    socket.broadcast.to(socketHostId).emit('opponent_left')
                 }
-                delete games[socketHostId]
-                socket.broadcast.to(socketHostId).emit('opponent_left')
                 console.log(`${socket.id} disconnected`)
             })
         }
@@ -112,6 +112,8 @@ const getGames = () => {
         })
 }
 
+const DELTA = 12
+
 class GameEngine  {
     constructor (hostName, socket, allGames) {
         this.allGames = allGames
@@ -134,9 +136,9 @@ class GameEngine  {
         }
         this.state = {
             ballX: canvas.width/2,
-            ballY: canvas.height-ballRadius,
-            dx: 14, // TODO get out
-            dy: -14, // TODO
+            ballY: canvas.height/2 -ballRadius,
+            dx: DELTA, // TODO get out
+            dy: 0, // TODO
             hostY: canvas.height/2,
             guestY: canvas.height/2,
             ballCollided: false,
@@ -145,16 +147,17 @@ class GameEngine  {
 
         this.score = {
             host: 0,
-            hostLives: 1, // TODO : lives   constant
+            hostLives: 5, // TODO : lives   constant
             guest: 0,
-            guestLives: 1
+            guestLives: 5
         }
 
         this.pauseInterval = undefined
 
         this.running = false
         this.engineInterval = undefined
-        this.gamePhase = 0  // TODO : applyto speed and make constant
+        this.gamePhaseInterval = undefined
+        this.gamePhase = 0
     }
 
     processMouseInput(socket, y) {
@@ -172,13 +175,13 @@ class GameEngine  {
 
             if(this.state.ballY < this.state.guestY - paddle.height/2 // GUEST miss
                 || this.state.ballY > this.state.guestY + paddle.height/2) {
-                // TODO:     2. Change dY/X depending on where paddle is hit
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
                 this.takeLife()
                 this.updateScore()
             } else {
                 this.state.dx = -this.state.dx
+                this.state.dy = this.calcDeltaY(this.state.guestY)
                 this.state.ballCollided = true
             }
         }
@@ -191,7 +194,7 @@ class GameEngine  {
                 this.takeLife(true)
                 this.updateScore()
             } else {
-                // TODO:     2. Change dY/X depending on where paddle is hit
+                this.state.dy = this.calcDeltaY(this.state.hostY)
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
             }
@@ -236,11 +239,12 @@ class GameEngine  {
             }
         }
 
-        this.state.ballX += this.state.dx//+(10-this.state.gamePhase)
-        this.state.ballY += this.state.dy//+(10-this.state.gamePhase)
+        this.state.ballX += this.state.dx
+        this.state.ballY += this.state.dy
     }
 
     start() {
+        this.setRandomDX()
         clearInterval(this.pauseInterval)
         this.running = true
         this.guestSocket.emit('game_started')
@@ -252,7 +256,7 @@ class GameEngine  {
             this.guestSocket.emit('new_game_state', this.state)
         }, 20)
 
-        setTimeout(this.stop, 60000)
+        this.startIncreasingPhase()
     }
 
     pause() {
@@ -275,11 +279,61 @@ class GameEngine  {
         this.running = false
         clearInterval(this.engineInterval)
         clearInterval(this.pauseInterval)
+        clearInterval(this.gamePhaseInterval)
+    }
+
+    startIncreasingPhase() {
+        this.gamePhaseInterval = setInterval(() => {
+            this.state.dx > 0 ? this.state.dx++ : this.state.dx--
+            this.state.dy > 0 ? this.state.dy++ : this.state.dy--
+        }, 6000) // every 30sec game speeds up
+    }
+
+    setRandomDX() {
+        const rand = Math.floor(Math.random() * 100)
+        if(rand < 50) {
+            this.state.dx = -DELTA
+        } else {
+            this.state.dx = DELTA
+        }
     }
 
     updateScore() {
         this.hostSocket.emit('score_update', this.score)
         this.guestSocket.emit('score_update', this.score)
+    }
+
+    // Use only if paddle hits the ball
+    calcDeltaY(playerY) {
+        const ballY = this.state.ballY
+        const dx = this.state.dx
+        const dy = this.state.dy
+        let nextDY = Math.abs(dy)
+        if(playerY > ballY) {
+            if(dy > 0) {
+                nextDY -= DELTA + this.gamePhase
+            } else {
+                nextDY += (DELTA / 2)
+            }
+        } else if(playerY < ballY) {
+            if(dy < 0) {
+                nextDY -= DELTA
+            } else{
+                nextDY += (DELTA / 2)
+            }
+        } else {
+            return dy
+        }
+
+        if(nextDY > Math.abs(dx)) {
+            nextDY = Math.abs(dx)
+        }
+
+        if(dy < 0) {
+            nextDY = -nextDY
+        }
+
+        return nextDY
     }
 
     // When breaking bricks
