@@ -101,3 +101,7 @@ body {
 ::-webkit-scrollbar-thumb:window-inactive {
     background: rgba(0, 151, 167, 0.4);
 }
+
+canvas {
+    border: 1px solid #0095DD;
+}

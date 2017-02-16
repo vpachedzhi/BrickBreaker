@@ -12,36 +12,16 @@ import ee from '../utils/eventEmitter'
 export default class GameField extends Component {
 
     static propTypes = {
-        running: React.PropTypes.bool.isRequired,
         isHost: React.PropTypes.bool.isRequired,
         socket: React.PropTypes.object.isRequired,
         onMouseMove: React.PropTypes.func.isRequired
     }
 
-    componentWillReceiveProps(newProps) {
-        if(newProps.running) {
-            clearInterval(this.interval)
-            this.interval = setInterval(this.draw, 20)
-        }
-        else {
-            clearInterval(this.interval)
-        }
-    }
-
     componentDidMount() {
-
-        this.gameState = {
-            ballX: canvas.width/2,
-            ballY: canvas.height-ballRadius,
-            hostY: canvas.height/2,
-            guestY: canvas.height/2
-        }
-
-        this.draw()
 
         this.props.socket.on('new_game_state', newState => {
             this.gameState = newState
-
+            this.draw()
             if (newState.ballCollided) {
                 ee.emit('BALL_HIT')
             }
@@ -54,8 +34,13 @@ export default class GameField extends Component {
     }
 
     draw = () => {
-        const canvasRef = this.refs.canvas,
-            ctx = canvasRef.getContext('2d'),
+        const canvasRef = this.refs.canvas
+        if(!canvasRef) {
+            setTimeout(this.draw, 1000)
+            return
+        }
+
+        const ctx = canvasRef.getContext('2d'),
             {ballX, ballY, hostY, guestY, bricks} = this.gameState
         const drawBall = () => {
                 ctx.beginPath();

@@ -114,8 +114,7 @@ export default class GameScreen extends Component {
             onTouchTap={this.onGameEnd}
         />
         return <div className="GameScreen">
-            <GameField running={this.state.running}
-                       opponentY={this.state.opponentY}
+            <GameField opponentY={this.state.opponentY}
                        isHost={this.state.isHost}
                        opponentSocketId={this.state.opponentSocketId}
                        socket={this.props.socket}

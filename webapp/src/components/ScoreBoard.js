@@ -35,7 +35,7 @@ export default class ScoreBoard extends Component {
             <List>
                 <ListItem primaryText={`${this.props.myName}: ${this.props.isHost ? this.state.host : this.state.guest}     Lives: ${this.props.isHost ? this.state.hostLives : this.state.guestLives}`}
                 />
-                <ListItem primaryText={`${this.props.otherName}: ${this.props.isHost ? this.state.host : this.state.guest}     Lives: ${!this.props.isHost ? this.state.hostLives : this.state.guestLives}`}
+                <ListItem primaryText={`${this.props.otherName}: ${!this.props.isHost ? this.state.host : this.state.guest}     Lives: ${!this.props.isHost ? this.state.hostLives : this.state.guestLives}`}
                 />
             </List>
             <div className="row">
