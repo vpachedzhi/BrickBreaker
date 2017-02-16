@@ -1,4 +1,16 @@
-const {canvas, ballRadius, paddle} = require('./webapp/config')
+const {
+    canvas,
+    ballRadius,
+    paddle,
+    brickRowCount,
+    brickColumnCount,
+    brickWidth,
+    brickHeight,
+    brickPadding,
+    brickOffsetTop,
+    brickOffsetLeft
+} = require('./webapp/config')
+
 const express = require('express')
 const path = require('path')
 const app = express()
@@ -30,9 +42,9 @@ io.on('connection', function(socket){
 
             if(game && game.guestName){
                 game.guestSocket.emit('opponent_left')
+                game.stop()
                 delete games[socket.id]
             } else {
-                delete games[socket.id]
                 notifyAllUpdate()
             }
             console.log(`${socket.id} disconnected`)
@@ -58,6 +70,9 @@ io.on('connection', function(socket){
             notifyAllUpdate()
             socket.broadcast.to(data.socketHostId).emit('opponent_joined', {socketGuestId:socket.id, name})
             socket.on('disconnect', () => {
+                if(games[socketHostId]){
+                    games[socketHostId].stop()
+                }
                 delete games[socketHostId]
                 socket.broadcast.to(socketHostId).emit('opponent_left')
                 console.log(`${socket.id} disconnected`)
@@ -104,14 +119,28 @@ class GameEngine  {
         this.hostSocket = socket
         this.guestName = ''
         this.guestSocket = undefined
+
+
+        let bricks = []
+        for(let c=0; c<brickColumnCount; c++){
+            bricks[c] = [];
+            for(let r=0; r<brickRowCount; r++){
+                bricks[c][r] = {
+                    x: (c*(brickWidth  + brickPadding)) + brickOffsetLeft,
+                    y: (r*(brickHeight + brickPadding)) + brickOffsetTop,
+                    status: Math.random() >= 0.5
+                }
+            }
+        }
         this.state = {
             ballX: canvas.width/2,
             ballY: canvas.height-ballRadius,
-            dx: 7, // TODO get out
-            dy: -7, // TODO
+            dx: 14, // TODO get out
+            dy: -14, // TODO
             hostY: canvas.height/2,
             guestY: canvas.height/2,
-            ballCollided: false
+            ballCollided: false,
+            bricks
         }
 
         this.score = {
@@ -173,6 +202,40 @@ class GameEngine  {
             this.state.ballCollided = true
         }
 
+        let {bricks, ballX, ballY, dx, dy} = this.state
+        for(let c=0; c<brickColumnCount; c++){
+            for(let r=0; r<brickRowCount; r++){
+                let b = bricks[c][r]
+                if(b.status) {
+
+                    if(ballX > b.x && ballX < b.x + brickWidth) {
+                        if((b.y + brickHeight < ballY && ballY + dy < b.y + brickHeight) ||
+                            (b.y > ballY && ballY + dy > b.y)){
+                            this.state.dy = -dy
+                            b.status = false
+                            this.state.ballCollided = true
+                        }
+
+
+
+                    }
+
+                    if(ballY > b.y && ballY < b.y + brickHeight) {
+                        if((b.x + brickWidth < ballX && ballX + dx < b.x + brickWidth) ||
+                            (b.x > ballX && ballX + dx > b.x)){
+                            this.state.dx = -dx
+                            b.status = false
+                            this.state.ballCollided = true
+                        }
+
+
+                    }
+
+                }
+
+            }
+        }
+
         this.state.ballX += this.state.dx//+(10-this.state.gamePhase)
         this.state.ballY += this.state.dy//+(10-this.state.gamePhase)
     }
@@ -187,7 +250,7 @@ class GameEngine  {
             this.mutateState()
             this.hostSocket.emit('new_game_state', this.state)
             this.guestSocket.emit('new_game_state', this.state)
-        }, 10)
+        }, 20)
 
         setTimeout(this.stop, 60000)
     }

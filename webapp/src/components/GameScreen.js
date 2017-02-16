@@ -142,7 +142,7 @@ export default class GameScreen extends Component {
                 open={this.state.guestJoinedOpen}
             >
                 You are the host.
-                You can can start the game whenever you want by writing "START" in the chat.
+                You can can start the game whenever you want by typing "START" in the chat.
                 Good luck !!!
             </Dialog>
             <Dialog

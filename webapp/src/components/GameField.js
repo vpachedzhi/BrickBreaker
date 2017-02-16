@@ -1,5 +1,13 @@
 import React, {Component} from 'react'
-import {canvas, ballRadius, paddle} from '../../config'
+import {
+    canvas,
+    ballRadius,
+    paddle,
+    brickRowCount,
+    brickColumnCount,
+    brickWidth,
+    brickHeight
+} from '../../config'
 import ee from '../utils/eventEmitter'
 export default class GameField extends Component {
 
@@ -13,7 +21,7 @@ export default class GameField extends Component {
     componentWillReceiveProps(newProps) {
         if(newProps.running) {
             clearInterval(this.interval)
-            this.interval = setInterval(this.draw, 10)
+            this.interval = setInterval(this.draw, 20)
         }
         else {
             clearInterval(this.interval)
@@ -48,7 +56,7 @@ export default class GameField extends Component {
     draw = () => {
         const canvasRef = this.refs.canvas,
             ctx = canvasRef.getContext('2d'),
-            {ballX, ballY, hostY, guestY} = this.gameState
+            {ballX, ballY, hostY, guestY, bricks} = this.gameState
         const drawBall = () => {
                 ctx.beginPath();
                 ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
@@ -69,12 +77,30 @@ export default class GameField extends Component {
                 ctx.fillStyle = "#0095DD";
                 ctx.fill();
                 ctx.closePath();
+            },
+            drawBricks = () => {
+                if(bricks){
+                    for(let c=0; c<brickColumnCount; c++) {
+                        for(let r=0; r<brickRowCount; r++) {
+                            const brick = bricks[c][r]
+                            if(brick.status) {
+                                ctx.beginPath();
+                                ctx.rect(brick.x, brick.y, brickWidth, brickHeight);
+                                ctx.fillStyle = "#0095DD";
+                                ctx.fill();
+                                ctx.closePath();
+                            }
+                        }
+                    }
+                }
+                //console.log(this.gameState)
             }
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBall()
         drawRightPaddle()
         drawLeftPaddle()
+        drawBricks()
     }
 
     render() {
