@@ -36,7 +36,7 @@ class GameEngine  {
         this.state = {
             ballX: canvas.width/2,
             ballY: canvas.height -ballRadius,
-            dx: DELTA, // TODO get out
+            dx: this.randomDX(), // TODO get out
             dy: DELTA, // TODO
             hostY: canvas.height/2,
             guestY: canvas.height/2,
@@ -78,6 +78,7 @@ class GameEngine  {
                 || this.state.ballY > this.state.guestY + paddle.height/2) {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
+                this.state.ballX -= paddle.width
                 this.takeLife()
             } else {
                 this.state.dx = -this.state.dx
@@ -92,6 +93,7 @@ class GameEngine  {
                 || this.state.ballY > this.state.hostY + paddle.height/2) {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
+                this.state.ballX += paddle.width
                 this.takeLife(true)
             } else {
                 this.state.dy = this.calcDeltaY(this.state.hostY)
@@ -147,7 +149,6 @@ class GameEngine  {
     }
 
     start() {
-        this.setRandomDX()
         clearInterval(this.pauseInterval)
         this.running = true
         this.guestSocket.emit('game_started')
@@ -187,17 +188,17 @@ class GameEngine  {
 
     startIncreasingPhase() {
         this.gamePhaseInterval = setInterval(() => {
-            this.state.dx > 0 ? this.state.dx++ : this.state.dx--
-            this.state.dy > 0 ? this.state.dy++ : this.state.dy--
-        }, 6000) // every 30sec game speeds up
+            this.state.dx > 0 ? this.state.dx+= DELTA/4 : this.state.dx-= DELTA/4
+            this.state.dy > 0 ? this.state.dy+= DELTA/4 : this.state.dy-= DELTA/4
+        }, 15000) // every 15sec game speeds up
     }
 
-    setRandomDX() {
+    randomDX() {
         const rand = Math.floor(Math.random() * 100)
         if(rand < 50) {
-            this.state.dx = -DELTA
+            return -DELTA
         } else {
-            this.state.dx = DELTA
+            return DELTA
         }
     }
 

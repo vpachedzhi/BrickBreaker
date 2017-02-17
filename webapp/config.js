@@ -7,7 +7,7 @@ const  ballRadius = canvas.width/120
 
 const paddle = {
     width: ballRadius*2,
-    height: canvas.height/3
+    height: canvas.height/4
 }
 
 const brickRowCount = 6;
