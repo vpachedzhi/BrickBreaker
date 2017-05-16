@@ -2,7 +2,8 @@
   "plugins": [
     "transform-decorators-legacy",
     "transform-class-properties",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "transform-flow-strip-types"
   ],
   "presets": [
     "es2015",

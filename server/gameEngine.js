@@ -1,3 +1,16 @@
+// const {
+//     canvas,
+//     ballRadius,
+//     paddle,
+//     brickRowCount,
+//     brickColumnCount,
+//     brickWidth,
+//     brickHeight,
+//     brickPadding,
+//     brickOffsetTop,
+//     brickOffsetLeft
+// } = require('../webapp/config')
+
 const {
     canvas,
     ballRadius,
@@ -9,7 +22,7 @@ const {
     brickPadding,
     brickOffsetTop,
     brickOffsetLeft
-} = require('../webapp/config')
+} = require('./config')
 
 const DELTA = 12
 
@@ -122,8 +135,6 @@ class GameEngine  {
                             this.state.ballCollided = true
                             this.addScore(1, this.lastHit)
                         }
-
-
 
                     }
 

@@ -4,30 +4,39 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack.config.js -d",
-    "watch": "webpack -d --watch"
+    "buildClient": "webpack --config webpack.config.js",
+    "watchClient": "webpack --watch --config webpack.config.js",
+    "buildServer": "webpack --config webpack.server.config.js",
+    "start": "nodemon server/index.js --exec babel-node --presets es2015,stage-2 --plugins babel-plugin-transform-flow-strip-types",
+    "serve": "node build/backend.js",
+    "flow": "flow"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.14.0",
-    "socket.io": "^1.7.2"
+    "express": "4.14.0",
+    "socket.io": "1.7.2"
   },
   "devDependencies": {
-    "babel-core": "^6.22.1",
-    "babel-loader": "^6.2.10",
-    "babel-plugin-transform-class-properties": "^6.22.0",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-plugin-transform-object-rest-spread": "^6.22.0",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-react": "^6.22.0",
-    "debounce": "^1.0.0",
-    "material-ui": "^0.16.7",
-    "react": "^15.4.2",
-    "react-dom": "^15.4.2",
-    "react-router": "^3.0.2",
-    "react-tap-event-plugin": "^2.0.1",
-    "webpack": "^1.14.0",
-    "webpack-node-externals": "^1.5.4"
+    "babel-cli": "6.24.1",
+    "babel-core": "6.24.1",
+    "babel-loader": "7.0.0",
+    "babel-plugin-transform-class-properties": "6.24.1",
+    "babel-plugin-transform-decorators-legacy": "1.3.4",
+    "babel-plugin-transform-flow-strip-types": "6.22.0",
+    "babel-plugin-transform-object-rest-spread": "6.23.0",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-react": "6.24.1",
+    "babel-preset-stage-2": "6.24.1",
+    "debounce": "1.0.0",
+    "flow-bin": "^0.46.0",
+    "material-ui": "0.18.1",
+    "nodemon": "1.11.0",
+    "react": "15.4.2",
+    "react-dom": "15.4.2",
+    "react-router": "2.7.0",
+    "react-tap-event-plugin": "2.0.1",
+    "webpack": "2.5.1",
+    "webpack-node-externals": "1.6.0"
   }
 }

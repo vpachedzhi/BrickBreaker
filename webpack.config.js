@@ -10,11 +10,14 @@ module.exports = {
         path: BUILD_DIR,
         filename: 'bundle.js'
     },
+    devtool: 'source-map',
     module: {
-        loaders: [{
+        rules: [{
             test: /\.jsx*$/,
             exclude: /node_modules/,
-            loader: 'babel',
+            use: {
+                loader: 'babel-loader'
+            }
         }]
     }
 };

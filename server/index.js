@@ -1,9 +1,11 @@
+// @flow
 const express = require('express')
 const path = require('path')
 const app = express()
-const GameEngine = require('./server/gameEngine')
+const GameEngine = require('./gameEngine')
+const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webapp')
 
-app.use(express.static(path.join(__dirname, 'webapp')))
+app.use(express.static(STATIC_DIR))
 
 const server = app.listen(3000, function () {
     console.log('App listening on port 3000!')

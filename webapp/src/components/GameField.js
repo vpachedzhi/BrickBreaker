@@ -7,7 +7,7 @@ import {
     brickColumnCount,
     brickWidth,
     brickHeight
-} from '../../config'
+} from '../../../server/config'
 import ee from '../utils/eventEmitter'
 export default class GameField extends Component {
 
