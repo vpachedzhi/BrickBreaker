@@ -55,8 +55,8 @@ export default class StartScreen extends Component {
 
     render() {
         return <Paper className="StartScreen">
-            <div className="row" style={{height: '10%'}}>
-                <div className="col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+            <div className="row center-md center-sm center-xs" style={{height: '10%'}}>
+                <div className="col-sm-8 col-md-4">
                     <div className="row">
                         <div className="col-md-6">
                             <TextField
@@ -84,8 +84,8 @@ export default class StartScreen extends Component {
                     </div>
                 </div>
             </div>
-            <div className="row" style={{height: '80%'}}>
-                <div className="GamesList col-sm-8 col-sm-offset-2 col-md-4 col-md-offset-4">
+            <div className="row center-md center-sm center-xs" style={{height: '80%'}}>
+                <div className="GamesList col-sm-8 col-md-4">
                     <List>
                         {this.state.roomsList.map((game, i) => {
                             return <ListItem key={i}
