@@ -12,7 +12,7 @@ import store from "./store"
 import BaseRoute from './components/BaseRoute'
 import StartScreen from './components/StartScreen'
 import GameScreen from './components/GameScreen'
-
+import MatterTry from './components/MattterTry'
 injectTapEventPlugin()
 const history = syncHistoryWithStore(hashHistory, store)
 
@@ -23,6 +23,7 @@ const App = () => (
                 <Route path="/" component={BaseRoute}>
                     <IndexRoute component={StartScreen}/>
                     <Route path="/game/:name/:role" component={GameScreen}/>
+                    <Route path="/matter" component={MatterTry}/>
                 </Route>
             </Router>
         </Provider>

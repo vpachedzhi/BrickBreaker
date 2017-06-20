@@ -5,6 +5,19 @@ const app = express()
 const GameEngine = require('./gameEngine')
 const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webapp')
 
+
+
+const MongoClient = require('mongodb').MongoClient
+    , assert = require('assert')
+const url = 'mongodb://localhost:27017/BrickBreaker'
+MongoClient.connect(url, function(err, db) {
+    assert.equal(null, err);
+    console.log("Connected successfully to server");
+
+    db.close();
+})
+
+
 app.use(express.static(STATIC_DIR))
 
 const server = app.listen(3000, function () {

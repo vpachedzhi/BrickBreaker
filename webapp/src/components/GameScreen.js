@@ -6,6 +6,7 @@ import ScoreBoard from './ScoreBoard'
 import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import PauseProgress from './PauseProgress'
+import socket from '../socket'
 
 export default class GameScreen extends Component {
 
@@ -29,8 +30,8 @@ export default class GameScreen extends Component {
     constructor(props) {
         super(props)
         if(this.state.isHost) {
-            this.props.socket.emit('create_game', {name: props.params.name})
-            this.props.socket.on('opponent_joined', data => {
+            socket.emit('create_game', {name: props.params.name})
+            socket.on('opponent_joined', data => {
                 this.setState({
                     opponent: data.name,
                     opponentSocketId: data.socketGuestId,
@@ -42,34 +43,34 @@ export default class GameScreen extends Component {
             const [socketHostId, hostName] = this.props.params.role.split('~')
             this.state.opponentSocketId = socketHostId
             this.state.opponent = hostName
-            this.props.socket.emit('join_game', {socketHostId, name: this.props.params.name})
+            socket.emit('join_game', {socketHostId, name: this.props.params.name})
         }
 
-        this.props.socket.on('opponent_left', () => {
+        socket.on('opponent_left', () => {
             this.setState({opponentLeft: true})
         })
 
-        this.props.socket.on('message_sent', this.onReceiveMessage)
+        socket.on('message_sent', this.onReceiveMessage)
 
-        this.props.socket.on('game_started', () => {
+        socket.on('game_started', () => {
             this.setState({running: true, pauseProgress: -1})
         })
 
-        this.props.socket.on('pause_progress', pauseProgress => {
+        socket.on('pause_progress', pauseProgress => {
             this.setState({running: false, pauseProgress})
         })
 
-        this.props.socket.on('game_ended', gameStatus => {
+        socket.on('game_ended', gameStatus => {
             this.setState({gameStatus})
         })
     }
 
     onSendMessage = (message) => {
         if(message === 'START' && this.state.isHost && this.state.opponent){
-            this.props.socket.emit('start_game')
+            socket.emit('start_game')
         }
         else {
-            this.props.socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
+            socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
         }
     }
 
@@ -80,25 +81,25 @@ export default class GameScreen extends Component {
 
     onGameEnd = () => {
         hashHistory.push(`/`)
-        this.props.socket.emit('request_update');
+        socket.emit('request_update');
     }
 
     onMouseMove = (e) => {
         if (this.state.running) {
-            this.props.socket.emit('mouse_move', {
+            socket.emit('mouse_move', {
                 y: e.clientY,
-                hostSocketId: this.state.isHost ? this.props.socket.id : this.state.opponentSocketId
+                hostSocketId: this.state.isHost ? socket.id : this.state.opponentSocketId
             })
         }
     }
 
     componentWillUnmount() {
-        this.props.socket.off('message_sent')
-        this.props.socket.off('opponent_left')
-        this.props.socket.off('opponent_joined')
-        this.props.socket.off('game_started')
-        this.props.socket.off('pause_progress')
-        this.props.socket.off('game_ended')
+        socket.off('message_sent')
+        socket.off('opponent_left')
+        socket.off('opponent_joined')
+        socket.off('game_started')
+        socket.off('pause_progress')
+        socket.off('game_ended')
     }
 
     render() {
@@ -117,14 +118,14 @@ export default class GameScreen extends Component {
             <GameField opponentY={this.state.opponentY}
                        isHost={this.state.isHost}
                        opponentSocketId={this.state.opponentSocketId}
-                       socket={this.props.socket}
+                       socket={socket}
                        onMouseMove={this.onMouseMove}
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
                     <ScoreBoard myName={this.props.params.name}
                                 otherName={this.state.opponent}
-                                socket={this.props.socket}
+                                socket={socket}
                                 isHost={this.state.isHost}>
                         {this.props.children}
                     </ScoreBoard>

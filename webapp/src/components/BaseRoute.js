@@ -5,14 +5,9 @@ import ee from '../utils/eventEmitter'
 export default class BaseRoute extends Component {
 
     state = {
-        musicOn: true,
-        volume: 0.15,
-        soundOn: true
-    }
-
-    constructor(props){
-        super(props)
-        this.socket = io()
+        musicOn: false,
+        volume: 0.05,
+        soundOn: false
     }
 
     onVolumeChange = (volume) => {
@@ -30,7 +25,7 @@ export default class BaseRoute extends Component {
     }
 
     componentDidMount() {
-        this.refs.music_audio.play()
+        //this.refs.music_audio.play()
         this.refs.music_audio.volume = this.state.volume
         ee.on('BALL_HIT', this.playPow)
     }
@@ -43,7 +38,8 @@ export default class BaseRoute extends Component {
         return <div>
             <audio ref="music_audio" src="http://trace.dnbradio.com/dnbradio_main.mp3"/>
             <audio ref="sound_audio" src="../pow.wav"/>
-            <this.props.children.type socket={this.socket} {...this.props.children.props}>
+            {/*<this.props.children.type socket={this.socket} {...this.props.children.props}>*/}
+            <this.props.children.type {...this.props.children.props}>
                 <MusicController musicOn={this.state.musicOn}
                                  volume={this.state.volume}
                                  soundOn={this.state.soundOn}

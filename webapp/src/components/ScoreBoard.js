@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import Paper from 'material-ui/Paper'
 import {List, ListItem} from 'material-ui/List'
+import socket from '../socket'
 
 export default class ScoreBoard extends Component {
 
@@ -19,7 +20,7 @@ export default class ScoreBoard extends Component {
     }
 
     componentDidMount() {
-        this.props.socket.on('score_update', score => {
+        socket.on('score_update', score => {
             this.setState({
                 host: score.host, hostLives: score.hostLives,
                 guest: score.guest, guestLives: score.guestLives})
@@ -27,7 +28,7 @@ export default class ScoreBoard extends Component {
     }
 
     componentWillUnmount() {
-        this.props.socket.off('score_update')
+        socket.off('score_update')
     }
 
     render () {

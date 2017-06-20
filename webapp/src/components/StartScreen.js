@@ -7,6 +7,8 @@ import {List, ListItem} from 'material-ui/List'
 import AvPlayCircleOutline from 'material-ui/svg-icons/av/play-circle-outline'
 import IconButton from 'material-ui/IconButton'
 
+import socket from '../socket'
+
 export default class StartScreen extends Component {
     state = {
         username: '',
@@ -22,14 +24,14 @@ export default class StartScreen extends Component {
 
     constructor(props) {
         super(props)
-        this.props.socket.on('rooms_list_update', (roomsList) => {
+        socket.on('rooms_list_update', (roomsList) => {
             this.setState({roomsList})
         })
     }
 
     onCreateGame = () => {
         if(this.state.username) {
-            this.props.socket.off('rooms_list_update')
+            socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/host`)
         } else {
             this.displayErrorText();
@@ -38,7 +40,7 @@ export default class StartScreen extends Component {
 
     onJoinGame = (game) => {
         if(this.state.username) {
-            this.props.socket.off('rooms_list_update')
+            socket.off('rooms_list_update')
             hashHistory.push(`/game/${this.state.username}/${game.socketHostId}~${game.hostName}`)
         } else {
             this.displayErrorText();

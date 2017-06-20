@@ -1,16 +1,3 @@
-// const {
-//     canvas,
-//     ballRadius,
-//     paddle,
-//     brickRowCount,
-//     brickColumnCount,
-//     brickWidth,
-//     brickHeight,
-//     brickPadding,
-//     brickOffsetTop,
-//     brickOffsetLeft
-// } = require('../webapp/config')
-
 const {
     canvas,
     ballRadius,
@@ -25,6 +12,7 @@ const {
 } = require('./config')
 
 const DELTA = 12
+const ballDiameter = 2 * ballRadius
 
 class GameEngine  {
     constructor (hostName, socket) {
@@ -41,7 +29,7 @@ class GameEngine  {
                 bricks[c][r] = {
                     x: (c*(brickWidth  + brickPadding)) + brickOffsetLeft,
                     y: (r*(brickHeight + brickPadding)) + brickOffsetTop,
-                    status: Math.random() >= 0.5
+                    status: true//Math.random() >= 0.5
                 }
             }
         }
@@ -92,7 +80,7 @@ class GameEngine  {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
                 this.state.ballX -= paddle.width
-                this.takeLife()
+                //this.takeLife()
             } else {
                 this.state.dx = -this.state.dx
                 this.state.dy = this.calcDeltaY(this.state.guestY)
@@ -107,7 +95,7 @@ class GameEngine  {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
                 this.state.ballX += paddle.width
-                this.takeLife(true)
+                //this.takeLife(true)
             } else {
                 this.state.dy = this.calcDeltaY(this.state.hostY)
                 this.state.dx = -this.state.dx
@@ -120,15 +108,15 @@ class GameEngine  {
             this.state.dy = -this.state.dy
             this.state.ballCollided = true
         }
-
         let {bricks, ballX, ballY, dx, dy} = this.state
         for(let c=0; c < brickColumnCount; c++){
             for(let r=0; r < brickRowCount; r++){
-                let b = bricks[c][r]
+                type Brick = {x: number, y: number, status: boolean}
+                let b: Brick = bricks[c][r]
                 if(b.status) {
 
                     if(ballX > b.x - ballRadius && ballX < b.x + brickWidth + ballRadius) {
-                        if((b.y + brickHeight < ballY - ballRadius && ballY - ballRadius + dy < b.y + brickHeight) ||
+                        if((b.y + brickHeight < ballY + ballRadius && ballY - ballRadius + dy < b.y + brickHeight) ||
                             (b.y > ballY + ballRadius && ballY + ballRadius + dy > b.y)){
                             this.state.dy = -dy
                             b.status = false
@@ -150,6 +138,17 @@ class GameEngine  {
 
                     }
 
+                    // if(b.y - ballDiameter < ballY && ballY < b.y + brickHeight + ballDiameter){ // between the horizontal axes
+                    //     if(ballX + ballRadius + dx > b.x || ballX - ballRadius + dx < b.x + brickWidth){
+                    //         this.state.dx = -dx
+                    //     }
+                    // }
+                    //
+                    // if(b.x - ballDiameter < ballX && ballX < b.x + brickWidth + ballDiameter){ // between the vertical axes
+                    //     if(ballY + ballRadius + dy > b.y || ballY - ballRadius + dy < b.y + brickHeight){
+                    //         this.state.dy = -dy
+                    //     }
+                    // }
                 }
 
             }
@@ -171,7 +170,7 @@ class GameEngine  {
             this.guestSocket.emit('new_game_state', this.state)
         }, 20)
 
-        this.startIncreasingPhase()
+        //this.startIncreasingPhase()
     }
 
     pause() {
