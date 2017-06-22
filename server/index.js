@@ -5,10 +5,10 @@ const app = express()
 const GameEngine = require('./gameEngine')
 const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webapp')
 const bodyParser = require('body-parser')
-
+const session = require('express-session')
 
 const MongoClient = require('mongodb').MongoClient
-    , assert = require('assert')
+const assert = require('assert')
 const url = 'mongodb://localhost:27017/brickBreaker'
 MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
@@ -20,6 +20,12 @@ MongoClient.connect(url, function(err, db) {
 
 app.use(express.static(STATIC_DIR))
 app.use(bodyParser.json())
+app.use(session({
+    secret: "manafanam",
+    resave: false,
+    saveUninitialized: true
+    //cookie: { secure: true }
+}))
 
 const server = app.listen(3000, function () {
     console.log('App listening on port 3000!')
@@ -36,7 +42,38 @@ app.post('/register', (req, res) => {
     res.status(201).json()
 })
 
+app.post('/login', (req, res) => {
+    const {name, password} = req.body
+    const User = req.app.locals.db.collection('User')
+    User.findOne({name, password}, (err, user) => {
+        if(err) {
+            res.status(500).send("ERROR")
+        } else if(!user) {
+            res.status(404).send("Wrong credentials")
+        } else {
+            req.session.user = user
+            res.status(200).send()
+        }
+    })
+})
 
+app.get('/isLoged', (req, res) => {
+    if(!req.session.user) {
+        res.status(401).send()
+    } else {
+        res.status(200).send()
+    }
+})
+
+app.get('/logout', (req, res) => {
+    if(!req.session) {
+        res.status(400)
+    } else {
+        req.session.destroy()
+        res.status(200).send()
+        console.log('  logged out')
+    }
+})
 
 // SOCKETS...
 
