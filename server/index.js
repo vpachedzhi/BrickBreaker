@@ -4,25 +4,41 @@ const path = require('path')
 const app = express()
 const GameEngine = require('./gameEngine')
 const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webapp')
-
+const bodyParser = require('body-parser')
 
 
 const MongoClient = require('mongodb').MongoClient
     , assert = require('assert')
-const url = 'mongodb://localhost:27017/BrickBreaker'
+const url = 'mongodb://localhost:27017/brickBreaker'
 MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
     console.log("Connected successfully to server");
-
-    db.close();
+    app.locals.db = db
+    //db.close();
 })
 
 
 app.use(express.static(STATIC_DIR))
+app.use(bodyParser.json())
 
 const server = app.listen(3000, function () {
     console.log('App listening on port 3000!')
 })
+
+app.post('/register', (req, res) => {
+    const {name, password} = req.body
+    const db = req.app.locals.db
+    const user = db.collection('User')
+
+    user.insertOne({name: name, password: password}).then(res => {
+        console.log(res)
+    })
+    res.status(201).json()
+})
+
+
+
+// SOCKETS...
 
 const io = require('socket.io')(server)
 

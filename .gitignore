@@ -2,3 +2,4 @@ build/*
 webapp/build/*
 node_modules/*
 .idea
+data/*

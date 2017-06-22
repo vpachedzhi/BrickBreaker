@@ -8,6 +8,7 @@
     "watchClient": "webpack --watch --config webpack.config.js",
     "buildServer": "flow-remove-types server/ -d build/",
     "buildServerWebpack": "webpack --config webpack.server.config.js",
+    "mongo": "mongod --dbpath=./data",
     "start": "nodemon server/index.js --exec babel-node --presets es2015,stage-2 --plugins babel-plugin-transform-flow-strip-types",
     "serve": "node build/index.js",
     "serveWebpack": "node build/backend.js",
@@ -16,6 +17,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "body-parser": "^1.17.2",
     "express": "4.14.0",
     "mongodb": "^2.2.26",
     "socket.io": "1.7.2"
