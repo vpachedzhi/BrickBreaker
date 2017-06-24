@@ -111,8 +111,7 @@ class GameEngine  {
         let {bricks, ballX, ballY, dx, dy} = this.state
         for(let c=0; c < brickColumnCount; c++){
             for(let r=0; r < brickRowCount; r++){
-                type Brick = {x: number, y: number, status: boolean}
-                let b: Brick = bricks[c][r]
+                let b = bricks[c][r]
                 if(b.status) {
 
                     if(ballX > b.x - ballRadius && ballX < b.x + brickWidth + ballRadius) {

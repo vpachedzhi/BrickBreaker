@@ -1,3 +1,3 @@
 //noinspection JSUnresolvedFunction
-const socket = io()
+const socket = null//io()
 export default socket

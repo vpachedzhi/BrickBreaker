@@ -10,24 +10,38 @@ import {Provider} from "react-redux"
 import {syncHistoryWithStore} from "react-router-redux"
 import store from "./store"
 import BaseRoute from './components/BaseRoute'
-import StartScreen from './components/StartScreen'
 import GameScreen from './components/GameScreen'
-import MatterTry from './components/MattterTry'
+import LoginScreen from "./components/LoginScreen/LoginScreen"
+import Home from "./components/Home/Home"
+import axios from 'axios'
 injectTapEventPlugin()
 const history = syncHistoryWithStore(hashHistory, store)
+import {push} from 'react-router-redux'
 
 const App = () => (
     <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>
         <Provider store={store}>
             <Router history={history}>
-                <Route path="/" component={BaseRoute}>
-                    <IndexRoute component={StartScreen}/>
-                    <Route path="/game/:name/:role" component={GameScreen}/>
-                    <Route path="/matter" component={MatterTry}/>
+                <Route path="/" component={BaseRoute} onEnter={checkLogin}>
+                    <IndexRoute component={Home} />
+                    <Route path="/game/:name/:role" component={GameScreen} />
                 </Route>
+                <Route path="*" component={LoginScreen}/>
             </Router>
         </Provider>
     </MuiThemeProvider>
 )
 
 ReactDom.render(<App/>, document.getElementById('brickBreaker'))
+
+function checkLogin(nextState, replace){
+    // Why thr fuck replace function doesn't work
+    // replace({
+    //     pathname: '/login',
+    //     state: {nextPathname: nextState.location.pathname}
+    // })
+    axios.get('/isLogged')
+        .catch(err => {
+            store.dispatch(push('/login'))
+        })
+}

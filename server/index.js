@@ -12,7 +12,7 @@ const assert = require('assert')
 const url = 'mongodb://localhost:27017/brickBreaker'
 MongoClient.connect(url, function(err, db) {
     assert.equal(null, err);
-    console.log("Connected successfully to server");
+    console.log("Connected successfully to db server");
     app.locals.db = db
     //db.close();
 })
@@ -52,12 +52,12 @@ app.post('/login', (req, res) => {
             res.status(404).send("Wrong credentials")
         } else {
             req.session.user = user
-            res.status(200).send()
+            res.status(200).send({name: user.name})
         }
     })
 })
 
-app.get('/isLoged', (req, res) => {
+app.get('/isLogged', (req, res) => {
     if(!req.session.user) {
         res.status(401).send()
     } else {

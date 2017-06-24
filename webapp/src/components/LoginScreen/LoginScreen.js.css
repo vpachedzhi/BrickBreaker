@@ -1,0 +1,11 @@
+.mainContainer {
+    position: absolute;
+    background-color: rgb(48, 48, 48);
+    height: 100%;
+    width: 100%;
+}
+
+.mainContainer h1 {
+    font-size: 5em;
+    color: rgba(255, 255, 255, 0.5);
+}
