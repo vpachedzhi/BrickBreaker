@@ -85,9 +85,12 @@ app.get('/search', (req, res) => {
     } else if(!req.session.user) {
         res.status(403).send()
     } else {
-        User.find({_id: new RegExp('^' + subStr + '$', 'i')}, (err, users) => {
+        User.find({_id: {'$regex' : subStr, '$options' : 'i'}}, (err, users) => {
             if(!err) {
-                res.status(200).json(users.map(user => user._id)).send()
+                res.status(200).json(users
+                    .map(user => user._id)
+                    .filter((e => e != req.session.user._id)))
+                    .send()
             }
         })
     }
