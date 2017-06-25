@@ -81,9 +81,8 @@ app.get('/logout', (req, res) => {
 app.get('/search', (req, res) => {
     const subStr = req.param('query')
     User.find({_id: new RegExp(subStr + '$', 'i')}, (err, users) => {
-        if(!users) {
-            console.error(err)
-            res.status(404).send()
+        if(subStr.length < 3 || subStr.length > 10) {
+            res.status(400).json('Search query should be between 3 and 10 symbols !').send()
         } else if(!req.session.user) {
             res.status(403).send()
         } else {
