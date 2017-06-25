@@ -16,7 +16,7 @@ import Home from "./components/Home/Home"
 import axios from 'axios'
 injectTapEventPlugin()
 const history = syncHistoryWithStore(hashHistory, store)
-import {push, replace} from 'react-router-redux'
+import {push} from 'react-router-redux'
 
 const App = () => (
     <MuiThemeProvider muiTheme={getMuiTheme(darkBaseTheme)}>

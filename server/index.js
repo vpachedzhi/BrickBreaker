@@ -79,15 +79,15 @@ app.get('/logout', (req, res) => {
 })
 
 app.get('/search', (req, res) => {
-    const subStr = req.param('query')
+    const subStr = req.query['query']
     if(!subStr || subStr.length < 3 || subStr.length > 10) {
         res.status(400).json('Search query should be between 3 and 10 symbols !').send()
     } else if(!req.session.user) {
         res.status(403).send()
     } else {
-        User.find({_id: new RegExp(subStr + '$', 'i')}, (err, users) => {
+        User.find({_id: new RegExp('^' + subStr + '$', 'i')}, (err, users) => {
             if(!err) {
-                res.status(200).json(users).send()
+                res.status(200).json(users.map(user => user._id)).send()
             }
         })
     }

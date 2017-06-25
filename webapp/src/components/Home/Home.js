@@ -7,11 +7,18 @@ import MenuItem from 'material-ui/MenuItem'
 import IconMenu from 'material-ui/IconMenu'
 import IconButton from 'material-ui/IconButton'
 import Avatar from 'material-ui/Avatar'
+import AutoComplete from 'material-ui/AutoComplete'
 import axios from 'axios'
 import store from '../../store'
 import {push} from 'react-router-redux'
 
 export default class Home extends Component {
+
+    state: {
+        searchData: Array<string>
+    } = {
+        searchData: []
+    }
 
     logOff = () =>{
         axios.get('/logout')
@@ -22,10 +29,29 @@ export default class Home extends Component {
             .catch(err => console.log(err))
     }
 
+    search = (query: string) => {
+        if(query.length > 2 && query.length <= 10){
+            axios.get('search',{params: {query}})
+                .then(({data}) => {
+                    console.log(data)
+                    this.setState({searchData: data})
+                })
+        }
+    }
+
     render(){
         return <div className={styles.mainContainer}>
             <Toolbar style={{backgroundColor: '#515658'}}>
                 <ToolbarGroup firstChild/>
+                <ToolbarGroup>
+                    <AutoComplete
+                        hintText="Search"
+                        filter={AutoComplete.noFilter}
+                        openOnFocus={true}
+                        dataSource={this.state.searchData}
+                        onUpdateInput={this.search}
+                    />
+                </ToolbarGroup>
                 <ToolbarGroup>
                     <IconMenu
                         style={{marginLeft: '20px'}}

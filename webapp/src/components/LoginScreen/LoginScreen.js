@@ -17,9 +17,13 @@ export default class LoginScreen extends Component {
     password: any
 
     state: {
-        newNameFail: boolean
+        newNameFail: boolean,
+        noSuchUser: boolean,
+        invalidPassword: boolean
     } = {
-        newNameFail: false
+        newNameFail: false,
+        noSuchUser: false,
+        invalidPassword: false
     }
 
     register = () => {
@@ -27,9 +31,9 @@ export default class LoginScreen extends Component {
         const password: string = this.newPassword.input.value
         if(name && password)
             axios.post('/register', {name, password})
-                .then(res => {
-                    console.log(res)
-                    this.login(name, password)
+                .then(({status}) => {
+                    if(status === 201)
+                        this.login(name, password)
                 })
                 .catch(err => {
                     console.log(err)
@@ -40,12 +44,19 @@ export default class LoginScreen extends Component {
     login = (name: string, password: string) => {
         axios.post('/login', {name, password})
             .then(({status, data}) =>{
-                if(status === 404){
-                    console.log('WTF')
-                }
                 if(status === 202){
                     store.dispatch({type: 'SET_USER', payload: data})
                     store.dispatch(push('/'))
+                }
+            })
+            .catch(({response: {status}}) => {
+                switch (status){
+                    case 404:
+                        this.setState({noSuchUser: true})
+                        break;
+                    case 400:
+                        this.setState({invalidPassword: true})
+                        break
                 }
             })
     }
@@ -66,12 +77,14 @@ export default class LoginScreen extends Component {
                                 floatingLabelText="Username"
                                 ref={newName => this.newName = newName}
                                 errorText={this.state.newNameFail ? 'This username is already used' : ''}
+                                onChange={() => this.setState({newNameFail: false})}
                             />
                             <br/>
                             <TextField
                                 floatingLabelText="Password"
                                 ref={newPassword => this.newPassword = newPassword}
                                 type="password"
+                                onKeyDown={({key}) => {if(key === 'Enter') this.register()}}
                             />
                             <br/>
                             <RaisedButton
@@ -89,12 +102,17 @@ export default class LoginScreen extends Component {
                             <TextField
                                 floatingLabelText="Username"
                                 ref={name => this.name = name}
+                                errorText={this.state.noSuchUser ? "Invalid user name" : ''}
+                                onChange={()=>this.setState({noSuchUser: false})}
                             />
                             <br/>
                             <TextField
                                 floatingLabelText="Password"
                                 ref={password => this.password = password}
                                 type="password"
+                                onKeyDown={({key}) => {if(key === 'Enter') this.login(this.name.input.value, this.password.input.value)}}
+                                errorText={this.state.invalidPassword ? "Invalid password" : ''}
+                                onChange={()=>this.setState({invalidPassword: false})}
                             />
                             <br/>
                             <RaisedButton
