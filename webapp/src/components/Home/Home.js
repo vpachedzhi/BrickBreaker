@@ -32,7 +32,8 @@ export default class Home extends Component {
                         iconButtonElement={
                             <IconButton touch={true} style={{'padding': '4px'}}>
                                 <Avatar size={40}>
-                                    <span >{store.getState().user.name.substr(0,1).toUpperCase()}</span>
+                                    {/*<span >{store.getState().user.name.substr(0,1).toUpperCase()}</span>*/}
+                                    <span>V</span>
                                 </Avatar>
                             </IconButton>
                         }
