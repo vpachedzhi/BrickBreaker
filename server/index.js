@@ -1,4 +1,5 @@
 // @flow
+const assert = require('assert')
 const express = require('express')
 const path = require('path')
 const app = express()
@@ -7,15 +8,31 @@ const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webap
 const bodyParser = require('body-parser')
 const session = require('express-session')
 
-const MongoClient = require('mongodb').MongoClient
-const assert = require('assert')
+const User = require('./dbInitializer')
+
+//const MongoClient = require('mongodb').MongoClient
+
 const url = 'mongodb://localhost:27017/brickBreaker'
-MongoClient.connect(url, function(err, db) {
-    assert.equal(null, err);
-    console.log("Connected successfully to db server");
+//
+// MongoClient.connect(url, function(err, db) {
+//     assert.equal(null, err);
+//     console.log("Connected successfully to db server");
+// }
+
+const mongoose = require('mongoose')
+mongoose.connect(url)
+const db = mongoose.connection
+db.on('error', console.error.bind(console, 'connection error:'))
+db.once('open', function() {
+    console.log('Connection successful !')
     app.locals.db = db
-    //db.close();
 })
+// MongoClient.connect(url, function(err, db) {
+//     assert.equal(null, err);
+//     console.log("Connected successfully to server");
+//     app.locals.db = db
+//     //db.close();
+//})
 
 
 app.use(express.static(STATIC_DIR))
@@ -24,7 +41,6 @@ app.use(session({
     secret: "manafanam",
     resave: false,
     saveUninitialized: true
-    //cookie: { secure: true }
 }))
 
 const server = app.listen(3000, function () {
@@ -33,26 +49,29 @@ const server = app.listen(3000, function () {
 
 app.post('/register', (req, res) => {
     const {name, password} = req.body
-    const db = req.app.locals.db
-    const user = db.collection('User')
-
-    user.insertOne({name: name, password: password}).then(res => {
-        console.log(res)
+    const user = new User({_id: name, password})
+    user.save((err, data) => {
+        if(err) {
+            console.error(err)
+            res.status(400).send()
+        } else {
+            res.status(201).json(data)
+        }
     })
-    res.status(201).json()
 })
 
 app.post('/login', (req, res) => {
     const {name, password} = req.body
-    const User = req.app.locals.db.collection('User')
-    User.findOne({name, password}, (err, user) => {
+    User.find({_id: name}, (err, users) => {
         if(err) {
-            res.status(500).send("ERROR")
-        } else if(!user) {
-            res.status(404).send("Wrong credentials")
+            res.status(404).json("No such user!").send()
         } else {
-            req.session.user = user
-            res.status(200).send({name: user.name})
+            if(password == users[0].password) {
+                req.session.user = users[0]
+                res.status(202).send()
+            } else {
+                res.status(400).json("Invalid password!").send()
+            }
         }
     })
 })

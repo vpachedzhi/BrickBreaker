@@ -43,7 +43,7 @@ export default class LoginScreen extends Component {
                 if(status === 404){
                     console.log('WTF')
                 }
-                if(status === 200){
+                if(status === 202){
                     store.dispatch({type: 'SET_USER', payload: data})
                     store.dispatch(push('/'))
                 }
