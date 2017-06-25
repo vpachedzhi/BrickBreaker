@@ -48,7 +48,7 @@ app.post('/login', (req, res) => {
     const {name, password} = req.body
     User.find({_id: name}, (err, users) => {
         if(!users.length) {
-            res.status(404).json("No such user!").send()
+            res.status(404).json("No such user!")
         } else {
             if(password == users[0].password) {
                 req.session.user = users[0]
@@ -81,7 +81,7 @@ app.get('/logout', (req, res) => {
 app.get('/search', (req, res) => {
     const subStr = req.query['query']
     if(!subStr || subStr.length < 3 || subStr.length > 10) {
-        res.status(400).json('Search query should be between 3 and 10 symbols !').send()
+        res.status(400).json('Search query should be between 3 and 10 symbols !')
     } else if(!req.session.user) {
         res.status(403).send()
     } else {
@@ -90,7 +90,6 @@ app.get('/search', (req, res) => {
                 res.status(200).json(users
                     .map(user => user._id)
                     .filter((e => e != req.session.user._id)))
-                    .send()
             }
         })
     }
