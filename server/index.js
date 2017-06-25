@@ -9,31 +9,16 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 
 const User = require('./dbInitializer')
-
-//const MongoClient = require('mongodb').MongoClient
-
 const url = 'mongodb://localhost:27017/brickBreaker'
-//
-// MongoClient.connect(url, function(err, db) {
-//     assert.equal(null, err);
-//     console.log("Connected successfully to db server");
-// }
-
 const mongoose = require('mongoose')
 mongoose.connect(url)
 const db = mongoose.connection
+
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function() {
     console.log('Connection successful !')
     app.locals.db = db
 })
-// MongoClient.connect(url, function(err, db) {
-//     assert.equal(null, err);
-//     console.log("Connected successfully to server");
-//     app.locals.db = db
-//     //db.close();
-//})
-
 
 app.use(express.static(STATIC_DIR))
 app.use(bodyParser.json())
@@ -52,7 +37,6 @@ app.post('/register', (req, res) => {
     const user = new User({_id: name, password})
     user.save((err, data) => {
         if(err) {
-            console.error(err)
             res.status(400).send()
         } else {
             res.status(201).json(data)
@@ -63,7 +47,7 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
     const {name, password} = req.body
     User.find({_id: name}, (err, users) => {
-        if(err) {
+        if(!users.length) {
             res.status(404).json("No such user!").send()
         } else {
             if(password == users[0].password) {
@@ -92,6 +76,20 @@ app.get('/logout', (req, res) => {
         res.status(200).send()
         console.log('  logged out')
     }
+})
+
+app.get('/search', (req, res) => {
+    const subStr = req.param('query')
+    User.find({_id: new RegExp(subStr + '$', 'i')}, (err, users) => {
+        if(!users) {
+            console.error(err)
+            res.status(404).send()
+        } else if(!req.session.user) {
+            res.status(403).send()
+        } else {
+            res.status(200).json(users).send()
+        }
+    })
 })
 
 // SOCKETS...
