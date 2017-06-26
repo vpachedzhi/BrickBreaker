@@ -15,9 +15,11 @@ import {push} from 'react-router-redux'
 export default class Home extends Component {
 
     state: {
-        searchData: Array<string>
+        searchData: Array<string>,
+        searchText: string
     } = {
-        searchData: []
+        searchData: [],
+        searchText: ''
     }
 
     logOff = () =>{
@@ -30,13 +32,26 @@ export default class Home extends Component {
     }
 
     search = (query: string) => {
-        if(query.length > 2 && query.length <= 10){
-            axios.get('search',{params: {query}})
-                .then(({data}) => {
-                    console.log(data)
-                    this.setState({searchData: data})
-                })
-        }
+        this.setState({searchText: query}, () => {
+            if(query.length > 2 && query.length <= 10){
+                axios.get('search',{params: {query}})
+                    .then(({data}) => {
+                        this.setState({searchData: data})
+                    })
+            }
+        })
+    }
+
+    handleSearchChoice = (playerName: string) => {
+        this.setState({searchText: ''}, () => {
+            if(this.state.searchData.find(plN => playerName === plN)){
+                console.log('Invite ' + playerName)
+            }
+            this.setState({searchData: []})
+        })
+
+
+
     }
 
     render(){
@@ -45,11 +60,13 @@ export default class Home extends Component {
                 <ToolbarGroup firstChild/>
                 <ToolbarGroup>
                     <AutoComplete
-                        hintText="Search"
+                        hintText="Search players"
                         filter={AutoComplete.noFilter}
                         openOnFocus={true}
                         dataSource={this.state.searchData}
+                        searchText={this.state.searchText}
                         onUpdateInput={this.search}
+                        onNewRequest={this.handleSearchChoice}
                     />
                 </ToolbarGroup>
                 <ToolbarGroup>
