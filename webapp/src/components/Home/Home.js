@@ -23,7 +23,7 @@ export default class Home extends Component {
     }
 
     logOff = () =>{
-        axios.get('/logout')
+        axios.get('/user/logout')
             .then(()=> {
             store.dispatch({type: 'CLEAR_USER'})
             store.dispatch(push('/login'))
@@ -34,7 +34,7 @@ export default class Home extends Component {
     search = (query: string) => {
         this.setState({searchText: query}, () => {
             if(query.length > 2 && query.length <= 10){
-                axios.get('search',{params: {query}})
+                axios.get('/user/search',{params: {query}})
                     .then(({data}) => {
                         this.setState({searchData: data})
                     })

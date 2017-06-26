@@ -14,6 +14,8 @@ const mongoose = require('mongoose')
 mongoose.connect(url)
 const db = mongoose.connection
 
+const userRoutes = require('./routes/user.routes')
+
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function() {
     console.log('Connection successful !')
@@ -28,72 +30,12 @@ app.use(session({
     saveUninitialized: true
 }))
 
+app.use('/user', userRoutes);
+
 const server = app.listen(3000, function () {
     console.log('App listening on port 3000!')
 })
 
-app.post('/register', (req, res) => {
-    const {name, password} = req.body
-    const user = new User({_id: name, password})
-    user.save((err, data) => {
-        if(err) {
-            res.status(400).send()
-        } else {
-            res.status(201).json(data)
-        }
-    })
-})
-
-app.post('/login', (req, res) => {
-    const {name, password} = req.body
-    User.find({_id: name}, (err, users) => {
-        if(!users.length) {
-            res.status(404).json("No such user!")
-        } else {
-            if(password == users[0].password) {
-                req.session.user = users[0]
-                res.status(202).send()
-            } else {
-                res.status(400).json("Invalid password!").send()
-            }
-        }
-    })
-})
-
-app.get('/isLogged', (req, res) => {
-    if(!req.session.user) {
-        res.status(401).send()
-    } else {
-        res.status(200).send()
-    }
-})
-
-app.get('/logout', (req, res) => {
-    if(!req.session) {
-        res.status(400)
-    } else {
-        req.session.destroy()
-        res.status(200).send()
-        console.log('  logged out')
-    }
-})
-
-app.get('/search', (req, res) => {
-    const subStr = req.query['query']
-    if(!subStr || subStr.length < 3 || subStr.length > 10) {
-        res.status(400).json('Search query should be between 3 and 10 symbols !')
-    } else if(!req.session.user) {
-        res.status(403).send()
-    } else {
-        User.find({_id: {'$regex' : subStr, '$options' : 'i'}}, (err, users) => {
-            if(!err) {
-                res.status(200).json(users
-                    .map(user => user._id)
-                    .filter((e => e != req.session.user._id)))
-            }
-        })
-    }
-})
 
 // SOCKETS...
 
