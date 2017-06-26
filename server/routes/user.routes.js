@@ -2,11 +2,11 @@ const express = require('express')
 const router = express.Router()
 const userToSocket = require('../userSocketMap')
 const User = require('../dbInitializer')
-
+const io = require('../index')
 
 router.post('/register', (req, res) => {
     const {name, password} = req.body
-    const user = new User({_id: name, password})
+    const user = new User({_id: name, password, available: false})
     user.save((err, data) => {
         if(err) {
             res.status(400).send()
@@ -25,6 +25,12 @@ router.post('/login', (req, res) => {
             if(password == users[0].password) {
                 req.session.user = users[0]
                 userToSocket.set(name, socketId)
+                User.findByIdAndUpdate(name, {$set: {available: true}}, function (err, user) {
+                    if(err) {
+                        console.error(err)
+                    }
+                })
+
                 res.status(202).send()
             } else {
                 res.status(400).json("Invalid password!").send()
@@ -45,6 +51,12 @@ router.get('/logout', (req, res) => {
     if(!req.session) {
         res.status(400)
     } else {
+        User.findByIdAndUpdate(req.session.user._id, {$set: {available: false}}, function (err) {
+            if(err) {
+                console.error(err)
+            }
+        })
+
         req.session.destroy()
         res.status(200).send()
         console.log('  logged out')
@@ -61,8 +73,9 @@ router.get('/search', (req, res) => {
         User.find({_id: {'$regex' : subStr, '$options' : 'i'}}, (err, users) => {
             if(!err) {
                 res.status(200).json(users
-                    .map(user => user._id)
-                    .filter((e => e != req.session.user._id)))
+                    .filter(user => user._id !== req.session.user._id)
+                    .map(user => ({name: user._id, available: user.available}))
+                    )
             }
         })
     }

@@ -46,7 +46,8 @@ export default class LoginScreen extends Component {
         axios.post('/user/login', {name, password,socketId: socket.id})
             .then(({status, data}) =>{
                 if(status === 202){
-                    store.dispatch({type: 'SET_USER', payload: data})
+                    console.log(data)
+                    localStorage.setItem('user', JSON.stringify({name}))
                     store.dispatch(push('/'))
                 }
             })

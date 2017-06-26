@@ -8,17 +8,21 @@ const STATIC_DIR = path.join(__dirname.split('/').slice(0,-1).join('/'), '/webap
 const bodyParser = require('body-parser')
 const session = require('express-session')
 
-const User = require('./dbInitializer')
 const url = 'mongodb://localhost:27017/brickBreaker'
 const mongoose = require('mongoose')
 mongoose.connect(url)
 const db = mongoose.connection
+const User = require('./dbInitializer')
 
+const userToSocket = require('./userSocketMap')
 const userRoutes = require('./routes/user.routes')
 
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function() {
     console.log('Connection successful !')
+    User.update({}, {available: false}, {multi: true}, (err) => {
+        if(err) console.error(err)
+    })
     app.locals.db = db
 })
 
@@ -114,8 +118,12 @@ io.on('connection', function(socket){
 
     socket.on('request_update', () => sendListUpdate(socket))
 
-    socket.on('invitation_request', (opponentName) => {
-
+    socket.on('invitation_request', ({opponent, inviter}) => {
+        const opponentSocketId: ?string = userToSocket.get(opponent)
+        const invSocketId : ?string = userToSocket.get(inviter)
+        if(opponentSocketId) {
+            socket.to(opponentSocketId).emit('invitation', invSocketId)
+        }
     })
 
 })
@@ -139,3 +147,5 @@ const getGames = () => {
             }
         })
 }
+
+module.exports = io

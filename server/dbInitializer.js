@@ -3,7 +3,8 @@ const Schema = mongoose.Schema
 
 const userSchema = new Schema({
     password: String,
-    _id: String
+    _id: String,
+    available: Boolean
 })
 
 userSchema.methods.validateName = () => {

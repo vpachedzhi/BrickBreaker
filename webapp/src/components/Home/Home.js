@@ -15,13 +15,14 @@ import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 import RefreshIndicator from 'material-ui/RefreshIndicator'
+import ActionDone from 'material-ui/svg-icons/action/done'
 import socket from '../../socket'
 
 
 export default class Home extends Component {
 
     state: {
-        searchData: Array<string>,
+        searchData: Array<Object>,
         searchText: string,
         opponentName: string
     } = {
@@ -31,13 +32,19 @@ export default class Home extends Component {
     }
 
     componentDidMount(){
-        socket.on('')
+        socket.on('invitation', (invSocketId) => {
+            console.log('Invitation received socketId:  ' + invSocketId)
+        })
+    }
+
+    componentWillUnmount() {
+        socket.off('invitation')
     }
 
     logOff = () =>{
         axios.get('/user/logout')
             .then(()=> {
-            store.dispatch({type: 'CLEAR_USER'})
+            localStorage.removeItem('user')
             store.dispatch(push('/login'))
         })
             .catch(err => console.log(err))
@@ -48,17 +55,25 @@ export default class Home extends Component {
             if(query.length > 2 && query.length <= 10){
                 axios.get('/user/search',{params: {query}})
                     .then(({data}) => {
-                        this.setState({searchData: data})
+                        this.setState({searchData: data.map(user => ({text: user.name, user, value: (
+                            <MenuItem
+                                primaryText={user.name}
+                                rightIcon={user.available ? <ActionDone/> : null}
+                                disabled={!user.available}
+                            />)}))})
                     })
             }
         })
     }
 
-    handleSearchChoice = (playerName: string) => {
+    handleSearchChoice = (selected: Object) => {
         this.setState({searchText: ''}, () => {
-            if(this.state.searchData.find(plN => playerName === plN)){
-                this.setState({opponentName: playerName}, () => {
-                    socket.emit('invitation_request', playerName)
+            if(this.state.searchData.find(({user}) => selected.user.name === user.name)){
+                this.setState({opponentName: selected.user.name}, () => {
+                    socket.emit('invitation_request', {
+                        opponent: selected.user.name,
+                        //$FlowFixMe
+                        inviter: JSON.parse(localStorage.getItem('user')).name})
                 })
             }
             this.setState({searchData: []})
@@ -71,7 +86,8 @@ export default class Home extends Component {
     render(){
         return <div className={styles.mainContainer}>
             <Toolbar style={{backgroundColor: '#515658'}}>
-                <ToolbarGroup firstChild/>
+                {/*$FlowFixMe*/}
+                <ToolbarGroup firstChild>{JSON.parse(localStorage.getItem('user')).name}</ToolbarGroup>
                 <ToolbarGroup>
                     <AutoComplete
                         hintText="Search players"
