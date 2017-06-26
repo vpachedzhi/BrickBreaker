@@ -30,7 +30,7 @@ export default class LoginScreen extends Component {
         const name: string = this.newName.input.value
         const password: string = this.newPassword.input.value
         if(name && password)
-            axios.post('/register', {name, password})
+            axios.post('/user/register', {name, password})
                 .then(({status}) => {
                     if(status === 201)
                         this.login(name, password)
@@ -42,7 +42,7 @@ export default class LoginScreen extends Component {
     }
 
     login = (name: string, password: string) => {
-        axios.post('/login', {name, password})
+        axios.post('/user/login', {name, password})
             .then(({status, data}) =>{
                 if(status === 202){
                     store.dispatch({type: 'SET_USER', payload: data})

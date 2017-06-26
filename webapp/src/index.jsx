@@ -40,7 +40,7 @@ function checkLogin(nextState, replace){
     //     pathname: '/login',
     //     state: {nextPathname: nextState.location.pathname}
     // })
-    axios.get('/isLogged')
+    axios.get('/user/isLogged')
         .catch(err => {
             store.dispatch(push('/login'))
         })
