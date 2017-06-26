@@ -25,7 +25,6 @@ router.post('/login', (req, res) => {
             if(password == users[0].password) {
                 req.session.user = users[0]
                 userToSocket.set(name, socketId)
-                console.log(userToSocket)
                 res.status(202).send()
             } else {
                 res.status(400).json("Invalid password!").send()

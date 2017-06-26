@@ -114,6 +114,10 @@ io.on('connection', function(socket){
 
     socket.on('request_update', () => sendListUpdate(socket))
 
+    socket.on('invitation_request', (opponentName) => {
+
+    })
+
 })
 
 const sendListUpdate = (socket) => {

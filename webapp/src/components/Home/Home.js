@@ -30,6 +30,10 @@ export default class Home extends Component {
         opponentName: ''
     }
 
+    componentDidMount(){
+        socket.on('')
+    }
+
     logOff = () =>{
         axios.get('/user/logout')
             .then(()=> {
@@ -53,8 +57,9 @@ export default class Home extends Component {
     handleSearchChoice = (playerName: string) => {
         this.setState({searchText: ''}, () => {
             if(this.state.searchData.find(plN => playerName === plN)){
-                console.log('Invite ' + playerName)
-                this.setState({opponentName: playerName})
+                this.setState({opponentName: playerName}, () => {
+                    socket.emit('invitation_request', playerName)
+                })
             }
             this.setState({searchData: []})
         })
