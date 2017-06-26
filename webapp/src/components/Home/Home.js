@@ -11,15 +11,23 @@ import AutoComplete from 'material-ui/AutoComplete'
 import axios from 'axios'
 import store from '../../store'
 import {push} from 'react-router-redux'
+import Dialog from 'material-ui/Dialog'
+import FlatButton from 'material-ui/FlatButton'
+import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
+import RefreshIndicator from 'material-ui/RefreshIndicator'
+import socket from '../../socket'
+
 
 export default class Home extends Component {
 
     state: {
         searchData: Array<string>,
-        searchText: string
+        searchText: string,
+        opponentName: string
     } = {
         searchData: [],
-        searchText: ''
+        searchText: '',
+        opponentName: ''
     }
 
     logOff = () =>{
@@ -46,6 +54,7 @@ export default class Home extends Component {
         this.setState({searchText: ''}, () => {
             if(this.state.searchData.find(plN => playerName === plN)){
                 console.log('Invite ' + playerName)
+                this.setState({opponentName: playerName})
             }
             this.setState({searchData: []})
         })
@@ -87,6 +96,22 @@ export default class Home extends Component {
                     </IconMenu>
                 </ToolbarGroup>
             </Toolbar>
+            <Dialog
+                title={`Please wait ${this.state.opponentName} to confirm.`}
+                open={!!this.state.opponentName}
+                actions={[
+                    <FlatButton
+                        label="Cancel"
+                        icon={<NavigationCancel/>}
+                        onClick={() => this.setState({opponentName: ''}, () => console.log('notify cancel'))}
+                    />
+                ]}
+                modal
+            >
+                <div style={{position: 'relative', height: 40}}>
+                    <RefreshIndicator top={0} left={0} status="loading"/>
+                </div>
+            </Dialog>
         </div>
     }
 }

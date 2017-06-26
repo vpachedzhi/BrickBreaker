@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-
+const userToSocket = require('../userSocketMap')
 const User = require('../dbInitializer')
 
 
@@ -17,13 +17,15 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
-    const {name, password} = req.body
+    const {name, password, socketId} = req.body
     User.find({_id: name}, (err, users) => {
         if(!users.length) {
             res.status(404).json("No such user!")
         } else {
             if(password == users[0].password) {
                 req.session.user = users[0]
+                userToSocket.set(name, socketId)
+                console.log(userToSocket)
                 res.status(202).send()
             } else {
                 res.status(400).json("Invalid password!").send()
