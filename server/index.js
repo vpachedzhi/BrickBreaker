@@ -118,12 +118,34 @@ io.on('connection', function(socket){
 
     socket.on('request_update', () => sendListUpdate(socket))
 
-    socket.on('invitation_request', ({opponent, inviter}) => {
+    socket.on('invitation_request', ({opponent, invitee}) => {
         const opponentSocketId: ?string = userToSocket.get(opponent)
-        const invSocketId : ?string = userToSocket.get(inviter)
+        const invSocketId : ?string = userToSocket.get(invitee)
         if(opponentSocketId) {
-            socket.to(opponentSocketId).emit('invitation', invSocketId)
+            socket.join(invitee)
+            socket.to(opponentSocketId).emit('invitation', {invSocketId, invitee})
         }
+    })
+
+    socket.on('decline', (userName: string) => {
+        const socketId: ?string = userToSocket.get(userName)
+        if(socketId)
+            socket.to(socketId).emit('declined')
+    })
+
+    socket.on('accept', ({invitee, invited}:{invitee:string, invited: string}) => {
+        const inviteeSid: ?string = userToSocket.get(invitee)
+        if(inviteeSid){
+            socket.to(inviteeSid).emit('accepted')
+
+            socket.join(inviteeSid)
+            io.to(inviteeSid).emit('game_ready', {invited, invitedSid: socket.id, invitee, inviteeSid})
+
+            // games[inviteeSid] = new GameEngine(invitee, socket)
+            // games[inviteeSid].emitState()
+            console.log('Game created by ' + invitee)
+        }
+        //...
     })
 
 })

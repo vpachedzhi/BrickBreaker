@@ -24,7 +24,7 @@ const App = () => (
             <Router history={history}>
                 <Route path="/" component={BaseRoute} onEnter={checkLogin}>
                     <IndexRoute component={Home} />
-                    <Route path="/game/:name/:role" component={GameScreen} />
+                    <Route path="/game" component={GameScreen}/>
                 </Route>
                 <Route path="*" component={LoginScreen}/>
             </Router>

@@ -1,16 +1,20 @@
 //@flow
-import type {ReduxAction} from './actions'
-//$FlowFixMe
-export default function (user = !!localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null,
+import type {ReduxAction, Role} from './actions'
+
+export default function (user: ?{
+                            name: string,
+                            role: Role
+                         } = null,
                          action: ReduxAction) {
 
     switch (action.type){
         case 'SET_USER':{
-            localStorage.setItem('user', JSON.stringify(action.payload))
-            return action.payload
+            return {
+                name: action.payload.playerName,
+                role: action.payload.role
+            }
         }
         case 'CLEAR_USER':{
-            localStorage.removeItem('user')
             return null
         }
         default:

@@ -43,7 +43,7 @@ export default class LoginScreen extends Component {
     }
 
     login = (name: string, password: string) => {
-        axios.post('/user/login', {name, password,socketId: socket.id})
+        axios.post('/user/login', {name, password})
             .then(({status, data}) =>{
                 if(status === 202){
                     console.log(data)

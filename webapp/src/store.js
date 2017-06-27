@@ -5,6 +5,7 @@ import {routerMiddleware, routerReducer} from "react-router-redux"
 import {hashHistory} from "react-router"
 // Here imports of the other reducers
 import user from './reducers/userReducer'
+import info from './reducers/infoReducer'
 
 //noinspection JSUnresolvedVariable
 const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
@@ -16,6 +17,7 @@ const middleware = applyMiddleware(promise(), thunk, historyMiddleware);
 export default createStore(
     combineReducers({
         user,
+        info,
         routing: routerReducer
     }),
     composeEnhancers(middleware)

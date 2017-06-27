@@ -1,3 +1,4 @@
+//@flow
 import React, {Component} from 'react'
 import {hashHistory} from 'react-router'
 import GameChat from './GameChat'
@@ -7,12 +8,29 @@ import Dialog from 'material-ui/Dialog'
 import FlatButton from 'material-ui/FlatButton'
 import PauseProgress from './PauseProgress'
 import socket from '../socket'
-
+import {connect} from 'react-redux'
+import type {Role} from "../reducers/actions"
+type GameScreenProps = {
+    user: {
+        name: string,
+        role: Role
+    },
+    info: {
+        myName: string,
+        otherName: string,
+        myId: string,
+        otherId: string
+    },
+    children: any
+}
+//$FlowFixMe
+@connect(({user, info}) => ({
+    user,
+    info
+}))
 export default class GameScreen extends Component {
 
-    static propTypes = {
-        socket: React.PropTypes.any
-    }
+    props: GameScreenProps
 
     state = {
         opponentSocketId: '',
@@ -24,26 +42,26 @@ export default class GameScreen extends Component {
         running: false,
         gameStatus: '',
         pauseProgress: -1,
-        isHost: this.props.params.role === 'host'
+        isHost: this.props.user.role === 'host'
     }
 
-    constructor(props) {
+    constructor(props: GameScreenProps) {
         super(props)
         if(this.state.isHost) {
-            socket.emit('create_game', {name: props.params.name})
-            socket.on('opponent_joined', data => {
-                this.setState({
-                    opponent: data.name,
-                    opponentSocketId: data.socketGuestId,
-                    guestJoinedOpen: true
-                })
-            })
+            // socket.emit('create_game', {name: props.user.name})
+            // socket.on('opponent_joined', data => {
+            //     this.setState({
+            //         opponent: data.name,
+            //         opponentSocketId: data.socketGuestId,
+            //         guestJoinedOpen: true
+            //     })
+            // })
         }
         else { // We are guest here
-            const [socketHostId, hostName] = this.props.params.role.split('~')
-            this.state.opponentSocketId = socketHostId
-            this.state.opponent = hostName
-            socket.emit('join_game', {socketHostId, name: this.props.params.name})
+            // const [socketHostId, hostName] = this.props.params.role.split('~')
+            // this.state.opponentSocketId = socketHostId
+            // this.state.opponent = hostName
+            // socket.emit('join_game', {socketHostId, name: this.props.user.name})
         }
 
         socket.on('opponent_left', () => {
@@ -65,16 +83,16 @@ export default class GameScreen extends Component {
         })
     }
 
-    onSendMessage = (message) => {
+    onSendMessage = (message: string) => {
         if(message === 'START' && this.state.isHost && this.state.opponent){
             socket.emit('start_game')
         }
         else {
-            socket.emit('message_sent', {message, opponentSocketId: this.state.opponentSocketId})
+            socket.emit('message_sent', {message, opponentSocketId: this.props.info.otherId})
         }
     }
 
-    onReceiveMessage = (msg) => {
+    onReceiveMessage = (msg: string) => {
         this.setState({newMessage: msg})
         this.setState({newMessage: ''})
     }
@@ -84,7 +102,7 @@ export default class GameScreen extends Component {
         socket.emit('request_update');
     }
 
-    onMouseMove = (e) => {
+    onMouseMove = (e: any) => {
         if (this.state.running) {
             socket.emit('mouse_move', {
                 y: e.clientY,
@@ -123,7 +141,7 @@ export default class GameScreen extends Component {
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
-                    <ScoreBoard myName={this.props.params.name}
+                    <ScoreBoard myName={this.props.user.name}
                                 otherName={this.state.opponent}
                                 socket={socket}
                                 isHost={this.state.isHost}>

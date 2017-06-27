@@ -17,14 +17,13 @@ router.post('/register', (req, res) => {
 })
 
 router.post('/login', (req, res) => {
-    const {name, password, socketId} = req.body
+    const {name, password} = req.body
     User.find({_id: name}, (err, users) => {
         if(!users.length) {
             res.status(404).json("No such user!")
         } else {
             if(password == users[0].password) {
                 req.session.user = users[0]
-                userToSocket.set(name, socketId)
                 User.findByIdAndUpdate(name, {$set: {available: true}}, function (err, user) {
                     if(err) {
                         console.error(err)
@@ -78,6 +77,17 @@ router.get('/search', (req, res) => {
                     )
             }
         })
+    }
+})
+
+router.post('/setSocket', (req, res) => {
+    if(!req.session.user)
+        res.status(403).send()
+    else {
+        const socketId = req.body.socketId
+        const name = req.body.name
+        userToSocket.set(name, socketId)
+        res.status(202).send()
     }
 })
 

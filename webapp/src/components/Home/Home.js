@@ -24,21 +24,65 @@ export default class Home extends Component {
     state: {
         searchData: Array<Object>,
         searchText: string,
-        opponentName: string
+        opponentName: string,
+        confirmModalOpen: boolean,
+        invitee: string
     } = {
         searchData: [],
         searchText: '',
-        opponentName: ''
+        opponentName: '',
+        confirmModalOpen: false,
+        invitee: ''
     }
 
-    componentDidMount(){
-        socket.on('invitation', (invSocketId) => {
-            console.log('Invitation received socketId:  ' + invSocketId)
+    constructor(){
+        super()
+        if(localStorage.getItem('user')){
+            //$FlowFixMe
+            axios.post('/user/setSocket',{socketId: socket.id, name: JSON.parse(localStorage.getItem('user')).name})
+        }
+    }
+
+    componentDidMount() {
+
+        console.log('Home screen mount')
+        socket.on('invitation', ({invSocketId, invitee}) => {
+            console.log('Invitation received socketId:  ' + invitee)
+            this.setState({confirmModalOpen: true, invitee})
+        })
+        socket.on('declined', () => this.setState({
+            opponentName: '',
+            confirmModalOpen: false,
+            invitee: ''
+        }))
+
+        socket.on('accepted', () => {
+            store.dispatch({type: "SET_USER", payload: {
+                //$FlowFixMe
+                playerName: JSON.parse(localStorage.getItem('user')).name,
+                role: "host"
+            }})
+            this.setState({opponentName: ''})
+        })
+
+        socket.on('game_ready', ({invited, invitedSid, invitee, inviteeSid}) => {
+            const isHost: boolean = store.getState().user.role === 'host'
+            const payload = {
+                myName: isHost ? invitee : invited,
+                otherName: isHost ? invited : invitee,
+                myId: isHost ? inviteeSid : invitedSid,
+                otherId: isHost ? invitedSid : inviteeSid
+            }
+            store.dispatch({type: 'SET_INFO', payload})
+            store.dispatch(push('/game'))
         })
     }
 
     componentWillUnmount() {
+        console.log('Home screen died')
         socket.off('invitation')
+        socket.off('declined')
+        socket.off('accepted')
     }
 
     logOff = () =>{
@@ -73,7 +117,7 @@ export default class Home extends Component {
                     socket.emit('invitation_request', {
                         opponent: selected.user.name,
                         //$FlowFixMe
-                        inviter: JSON.parse(localStorage.getItem('user')).name})
+                        invitee: JSON.parse(localStorage.getItem('user')).name})
                 })
             }
             this.setState({searchData: []})
@@ -83,8 +127,36 @@ export default class Home extends Component {
 
     }
 
+    acceptInvitation = (): void => {
+        this.setState({confirmModalOpen: false}, () => {
+            socket.emit('accept', {
+                invitee: this.state.invitee,
+                //$FlowFixMe
+                invited: JSON.parse(localStorage.getItem('user')).name
+            })
+            store.dispatch({
+                type: 'SET_USER',
+                payload: {
+                    //$FlowFixMe
+                    playerName: JSON.parse(localStorage.getItem('user')).name,
+                    role: "guest"
+                }
+            })
+        })
+    }
+
+    declineInvitation = (): void => {
+        socket.emit('decline', this.state.opponentName ? this.state.opponentName : this.state.invitee)
+        this.setState({
+            opponentName: '',
+            confirmModalOpen: false,
+            invitee: ''
+        })
+    }
+
     render(){
-        return <div className={styles.mainContainer}>
+        //$FlowFixMe
+        return localStorage.getItem('user') && <div className={styles.mainContainer}>
             <Toolbar style={{backgroundColor: '#515658'}}>
                 {/*$FlowFixMe*/}
                 <ToolbarGroup firstChild>{JSON.parse(localStorage.getItem('user')).name}</ToolbarGroup>
@@ -124,7 +196,7 @@ export default class Home extends Component {
                     <FlatButton
                         label="Cancel"
                         icon={<NavigationCancel/>}
-                        onClick={() => this.setState({opponentName: ''}, () => console.log('notify cancel'))}
+                        onClick={this.declineInvitation}
                     />
                 ]}
                 modal
@@ -132,6 +204,24 @@ export default class Home extends Component {
                 <div style={{position: 'relative', height: 40}}>
                     <RefreshIndicator top={0} left={0} status="loading"/>
                 </div>
+            </Dialog>
+            <Dialog
+                title={`${this.state.invitee} wants to play with you.`}
+                open={this.state.confirmModalOpen}
+                actions={[
+                    <FlatButton
+                        label="Accept"
+                        icon={<ActionDone/>}
+                        onClick={this.acceptInvitation}
+                    />,
+                    <FlatButton
+                        label="Cancel"
+                        icon={<NavigationCancel/>}
+                        onClick={this.declineInvitation}
+                    />
+                ]}
+                modal
+            >
             </Dialog>
         </div>
     }
