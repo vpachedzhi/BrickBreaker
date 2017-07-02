@@ -13,9 +13,11 @@ const mongoose = require('mongoose')
 mongoose.connect(url)
 const db = mongoose.connection
 const User = require('./dbInitializer')
+const Game = require('./db')
 
 const userToSocket = require('./userSocketMap')
 const userRoutes = require('./routes/user.routes')
+const gameRoutes = require('./routes/game.routes')
 
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', function() {
@@ -34,7 +36,8 @@ app.use(session({
     saveUninitialized: true
 }))
 
-app.use('/user', userRoutes);
+app.use('/user', userRoutes)
+app.use('/game', gameRoutes)
 
 const server = app.listen(3000, function () {
     console.log('App listening on port 3000!')
@@ -179,6 +182,16 @@ const getGames = () => {
                 socketHostId
             }
         })
+}
+
+const saveGame = (hostName, guestName, winner) => {
+    const date = new Date()
+    const game = new Game({host: hostName, guest: guestName, winner, date})
+    game.save((err) => {
+        if(err) {
+            console.error(err)
+        }
+    })
 }
 
 module.exports = io

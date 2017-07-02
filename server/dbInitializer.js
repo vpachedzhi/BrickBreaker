@@ -13,5 +13,22 @@ userSchema.methods.validateName = () => {
 
 const User = mongoose.model('users', userSchema)
 
-module.exports = User
+module.exports=User
+// const gameSchema = new Schema({
+//     host: String,
+//     guest: String,
+//     winner: String,
+//     timestamp: Date
+// })
+//
+// gameSchema.methods.validateNames = () => {
+//     return this.host !== this.guest
+// }
+//
+// const Game = mongoose.model('games', gameSchema)
+//
+// module.exports = {
+//     User,
+//     Game
+// }
 
