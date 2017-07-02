@@ -42,7 +42,7 @@ export default class GameScreen extends Component {
         running: false,
         gameStatus: '',
         pauseProgress: -1,
-        isHost: this.props.user.role === 'host'
+        isHost: this.props.user ? (this.props.user.role === 'host') : ''
     }
 
     constructor(props: GameScreenProps) {
@@ -78,13 +78,17 @@ export default class GameScreen extends Component {
             this.setState({running: false, pauseProgress})
         })
 
-        socket.on('game_ended', gameStatus => {
-            this.setState({gameStatus})
+        socket.on('game_ended', winnerId => {
+            if(socket.id === winnerId) {
+                this.setState({gameStatus: 'won'})
+            } else {
+                this.setState({gameStatus: 'lost'})
+            }
         })
     }
 
     onSendMessage = (message: string) => {
-        if(message === 'START' && this.state.isHost && this.state.opponent){
+        if(message === 'START' && this.state.isHost){
             socket.emit('start_game')
         }
         else {
@@ -106,7 +110,7 @@ export default class GameScreen extends Component {
         if (this.state.running) {
             socket.emit('mouse_move', {
                 y: e.clientY,
-                hostSocketId: this.state.isHost ? socket.id : this.state.opponentSocketId
+                hostName: this.state.isHost ? this.props.info.myName : this.props.info.otherName
             })
         }
     }
@@ -132,7 +136,7 @@ export default class GameScreen extends Component {
             primary={true}
             onTouchTap={this.onGameEnd}
         />
-        return <div className="GameScreen">
+        return this.props.user && <div className="GameScreen">
             <GameField opponentY={this.state.opponentY}
                        isHost={this.state.isHost}
                        opponentSocketId={this.state.opponentSocketId}
@@ -141,8 +145,8 @@ export default class GameScreen extends Component {
             />
             <div className="row BottomPanel">
                 <div className="ScoreBoard col-md-4 col-sm-4 col-lg-4">
-                    <ScoreBoard myName={this.props.user.name}
-                                otherName={this.state.opponent}
+                    <ScoreBoard myName={this.props.info.myName}
+                                otherName={this.props.info.otherName}
                                 socket={socket}
                                 isHost={this.state.isHost}>
                         {this.props.children}

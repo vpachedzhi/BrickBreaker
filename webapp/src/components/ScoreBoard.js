@@ -5,11 +5,8 @@ import socket from '../socket'
 
 export default class ScoreBoard extends Component {
 
-    static propTypes = {
-        myName: React.PropTypes.string.isRequired,
-        otherName: React.PropTypes.string.isRequired,
-        socket: React.PropTypes.object.isRequired,
-        isHost: React.PropTypes.bool.isRequired
+    props: {
+
     }
 
     state = {

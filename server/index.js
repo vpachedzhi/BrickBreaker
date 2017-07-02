@@ -112,8 +112,9 @@ io.on('connection', function(socket){
         socket.broadcast.to(data.opponentSocketId).emit('message_sent', data.message)
     })
 
-    socket.on('mouse_move', ({y, hostSocketId}) => {
-        if(games[hostSocketId]) games[hostSocketId].processMouseInput(socket, y)
+    socket.on('mouse_move', ({y, hostName}) => {
+        const hostSocketId = userToSocket.get(hostName)
+        if(hostSocketId && games[hostSocketId]) games[hostSocketId].processMouseInput(y, socket.id)
     })
 
     socket.on('request_update', () => sendListUpdate(socket))
@@ -135,17 +136,27 @@ io.on('connection', function(socket){
 
     socket.on('accept', ({invitee, invited}:{invitee:string, invited: string}) => {
         const inviteeSid: ?string = userToSocket.get(invitee)
-        if(inviteeSid){
+        const invitedSid: ?string = userToSocket.get(invited)
+        if(inviteeSid && invitedSid){
             socket.to(inviteeSid).emit('accepted')
 
             socket.join(inviteeSid)
             io.to(inviteeSid).emit('game_ready', {invited, invitedSid: socket.id, invitee, inviteeSid})
 
-            // games[inviteeSid] = new GameEngine(invitee, socket)
-            // games[inviteeSid].emitState()
+            const game = new GameEngine(inviteeSid, invitedSid, io)
+            games[inviteeSid] = game
+            game.emitState()
+
             console.log('Game created by ' + invitee)
         }
         //...
+    })
+
+    socket.on('start_game', () => {
+        const game = games[socket.id]
+        if(game) {
+            game.pause()
+        }
     })
 
 })

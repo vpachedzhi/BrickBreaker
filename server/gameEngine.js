@@ -1,3 +1,4 @@
+//@flow
 const {
     canvas,
     ballRadius,
@@ -15,12 +16,39 @@ const DELTA = 12
 const ballDiameter = 2 * ballRadius
 
 class GameEngine  {
-    constructor (hostName, socket) {
-        this.hostName = hostName
-        this.hostSocket = socket
-        this.guestName = ''
-        this.guestSocket = undefined
+    hostSocketId: string
+    guestSocketId: string
+    state: {
+        ballX: number,
+        ballY: number,
+        dx: number,
+        dy: number,
+        hostY: number,
+        guestY: number,
+        ballCollided: boolean,
+        bricks: Array<Array<Object>>
+    }
 
+    score: {
+        host: number,
+        hostLives: number,
+        guest: number,
+        guestLives: number
+    }
+
+    lastHit: string
+    pauseInterval: any
+    running: boolean
+    engineInterval: any
+    gamePhaseInterval: any
+    gamePhase: number
+
+    io: any
+
+    constructor (hostSocketId: string, guestSocketId: string, io: any) {
+        this.hostSocketId = hostSocketId
+        this.guestSocketId = guestSocketId
+        this.io = io
 
         let bricks = []
         for(let c=0; c<brickColumnCount; c++){
@@ -62,8 +90,8 @@ class GameEngine  {
         this.gamePhase = 0
     }
 
-    processMouseInput(socket, y) {
-        if(socket === this.hostSocket) {
+    processMouseInput(y: number, socketId: string) {
+        if(socketId === this.hostSocketId) {
             this.state.hostY = y
         } else {
             this.state.guestY = y
@@ -80,7 +108,7 @@ class GameEngine  {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
                 this.state.ballX -= paddle.width
-                //this.takeLife()
+                this.takeLife(false)
             } else {
                 this.state.dx = -this.state.dx
                 this.state.dy = this.calcDeltaY(this.state.guestY)
@@ -95,7 +123,7 @@ class GameEngine  {
                 this.state.dx = -this.state.dx
                 this.state.ballCollided = true
                 this.state.ballX += paddle.width
-                //this.takeLife(true)
+                this.takeLife(true)
             } else {
                 this.state.dy = this.calcDeltaY(this.state.hostY)
                 this.state.dx = -this.state.dx
@@ -160,13 +188,11 @@ class GameEngine  {
     start() {
         clearInterval(this.pauseInterval)
         this.running = true
-        this.guestSocket.emit('game_started')
-        this.hostSocket.emit('game_started')
+        this.io.to(this.hostSocketId).emit('game_started')
 
         this.engineInterval = setInterval(() => {
             this.mutateState()
-            this.hostSocket.emit('new_game_state', this.state)
-            this.guestSocket.emit('new_game_state', this.state)
+            this.io.to(this.hostSocketId).emit('new_game_state', this.state)
         }, 20)
 
         //this.startIncreasingPhase()
@@ -179,8 +205,7 @@ class GameEngine  {
         let progress = 0
         this.pauseInterval = setInterval(() => {
             if(progress < 101) {
-                this.hostSocket.emit('pause_progress', progress)
-                this.guestSocket.emit('pause_progress', progress)
+                this.io.to(this.hostSocketId).emit('pause_progress', progress)
                 progress+= 10
             } else {
                 this.start()
@@ -212,19 +237,15 @@ class GameEngine  {
     }
 
     emitScore() {
-        this.hostSocket.emit('score_update', this.score)
-        this.guestSocket.emit('score_update', this.score)
+        this.io.to(this.hostSocketId).emit('score_update', this.score)
     }
 
     emitState() {
-        this.hostSocket.emit('new_game_state', this.state)
-        if(this.guestSocket) {
-            this.guestSocket.emit('new_game_state', this.state)
-        }
+        this.io.to(this.hostSocketId).emit('new_game_state', this.state)
     }
 
     // Use only if paddle hits the ball
-    calcDeltaY(playerY) {
+    calcDeltaY(playerY: number) {
         const ballY = this.state.ballY
         const dx = this.state.dx
         const dy = this.state.dy
@@ -257,7 +278,7 @@ class GameEngine  {
     }
 
     // When breaking bricks
-    addScore(add, to) {
+    addScore(add: number, to: string) {
         if(to === 'host') {
             this.score.host += add
             if(this.score.host > 4) {
@@ -274,7 +295,7 @@ class GameEngine  {
         this.emitScore()
     }
 
-    takeLife(toHost) {
+    takeLife(toHost: boolean) {
         if(toHost) {
             if(--this.score.hostLives) {
                 this.pause()
@@ -291,13 +312,11 @@ class GameEngine  {
         this.emitScore()
     }
 
-    end(hostWon) {
+    end(hostWon: boolean) {
         if(hostWon) {
-            this.hostSocket.emit('game_ended', 'won')
-            this.guestSocket.emit('game_ended', 'lost')
+            this.io.to(this.hostSocketId).emit('game_ended', this.hostSocketId)
         } else {
-            this.hostSocket.emit('game_ended', 'lost')
-            this.guestSocket.emit('game_ended', 'won')
+            this.io.to(this.hostSocketId).emit('game_ended', this.guestSocketId)
         }
         this.stop()
     }
