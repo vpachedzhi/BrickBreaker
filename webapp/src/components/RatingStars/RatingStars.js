@@ -16,8 +16,8 @@ export default function({rating, size}: {rating: number, size: number}){
         {
             Array.from(new Array(numberOfStars).keys())
                 .map((i: number) => {
-                    const min = i * interval
-                    const max = (i + 1) * interval
+                    const min = round2(i * interval)
+                    const max = round2((i + 1) * interval)
                     if(rating <= min)
                         return <StarBorder key={i} style={starStyle}/>
                     else if(rating >= max)
@@ -27,4 +27,8 @@ export default function({rating, size}: {rating: number, size: number}){
                 })
         }
         </div> : null
+}
+
+function round2(n: number): number {
+    return parseFloat(n.toFixed(2))
 }

@@ -41,6 +41,8 @@ export default class Home extends Component {
         usersOnline: []
     }
 
+    onlineUsersInterval: any
+
     constructor(){
         super()
         if(localStorage.getItem('user')){
@@ -90,18 +92,22 @@ export default class Home extends Component {
                 .then(({data}) => {
                     this.setState({rating: data})
                 })
+            this.getOnlineUsers()
+            this.onlineUsersInterval = setInterval(this.getOnlineUsers, 10 * 1000)
 
-            axios.get('/user/usersOnline')
-                .then(({data}) => {
-                    this.setState({usersOnline: data})
-                })
         }
     }
+
+    getOnlineUsers = () => axios.get('/user/usersOnline')
+        .then(({data}) => {
+            this.setState({usersOnline: data})
+        })
 
     componentWillUnmount() {
         socket.off('invitation')
         socket.off('declined')
         socket.off('accepted')
+        clearInterval(this.onlineUsersInterval)
     }
 
     logOff = () =>{

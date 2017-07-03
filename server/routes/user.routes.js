@@ -2,8 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userToSocket = require('../userSocketMap')
 const User = require('../models/userSchema')
-const Game = require('../db')
-const io = require('../index')
+const Game = require('../models/gameSchema')
 
 router.post('/register', (req, res) => {
     const {name, password} = req.body
@@ -23,9 +22,9 @@ router.post('/login', (req, res) => {
         if(!users.length) {
             res.status(404).json("No such user!")
         } else {
-            if(password == users[0].password) {
+            if(password === users[0].password) {
                 req.session.user = users[0]
-                User.findByIdAndUpdate(name, {$set: {available: true}}, function (err, user) {
+                User.findByIdAndUpdate(name, {$set: {available: true}}, function (err) {
                     if(err) {
                         console.error(err)
                     }
