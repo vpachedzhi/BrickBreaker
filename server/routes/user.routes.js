@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const userToSocket = require('../userSocketMap')
-const User = require('../dbInitializer')
+const User = require('../models/userSchema')
 const Game = require('../db')
 const io = require('../index')
 
