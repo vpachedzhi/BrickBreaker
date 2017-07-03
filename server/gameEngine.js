@@ -44,11 +44,13 @@ class GameEngine  {
     gamePhase: number
 
     io: any
+    onEnd: any
 
-    constructor (hostSocketId: string, guestSocketId: string, io: any) {
+    constructor (hostSocketId: string, guestSocketId: string, io: any, onGameEnd: any) {
         this.hostSocketId = hostSocketId
         this.guestSocketId = guestSocketId
         this.io = io
+        this.onEnd = onGameEnd
 
         let bricks = []
         for(let c=0; c<brickColumnCount; c++){
@@ -319,6 +321,7 @@ class GameEngine  {
             this.io.to(this.hostSocketId).emit('game_ended', this.guestSocketId)
         }
         this.stop()
+        this.onEnd(hostWon)
     }
 }
 

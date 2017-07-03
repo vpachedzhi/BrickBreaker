@@ -24,12 +24,6 @@ router.post('/login', (req, res) => {
         } else {
             if(password === users[0].password) {
                 req.session.user = users[0]
-                User.findByIdAndUpdate(name, {$set: {available: true}}, function (err) {
-                    if(err) {
-                        console.error(err)
-                    }
-                })
-
                 res.status(202).send()
             } else {
                 res.status(400).json("Invalid password!").send()
@@ -42,6 +36,7 @@ router.get('/isLogged', (req, res) => {
     if(!req.session.user) {
         res.status(401).send()
     } else {
+        User.findByIdAndUpdate(req.session.user._id, {$set: {available: true}}, err => console.error(err))
         res.status(200).send()
     }
 })
@@ -50,15 +45,10 @@ router.get('/logout', (req, res) => {
     if(!req.session) {
         res.status(400)
     } else {
-        User.findByIdAndUpdate(req.session.user._id, {$set: {available: false}}, function (err) {
-            if(err) {
-                console.error(err)
-            }
-        })
+        User.findByIdAndUpdate(req.session.user._id, {$set: {available: false}}, err => console.error(err))
 
         req.session.destroy()
         res.status(200).send()
-        console.log('  logged out')
     }
 })
 
