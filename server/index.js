@@ -125,6 +125,7 @@ io.on('connection', function(socket){
     socket.on('request_update', () => sendListUpdate(socket))
 
     socket.on('invitation_request', ({opponent, invitee}) => {
+        makeUnavailable(invitee)
         const opponentSocketId: ?string = userToSocket.get(opponent)
         const invSocketId : ?string = userToSocket.get(invitee)
         if(opponentSocketId) {
@@ -140,6 +141,7 @@ io.on('connection', function(socket){
     })
 
     socket.on('accept', ({invitee, invited}:{invitee:string, invited: string}) => {
+        makeUnavailable(invited)
         const inviteeSid: ?string = userToSocket.get(invitee)
         const invitedSid: ?string = userToSocket.get(invited)
         if(inviteeSid && invitedSid){
@@ -147,14 +149,19 @@ io.on('connection', function(socket){
 
             socket.join(inviteeSid)
             io.to(inviteeSid).emit('game_ready', {invited, invitedSid: socket.id, invitee, inviteeSid})
+            const game = new GameEngine(inviteeSid, invitedSid, io, (hostWon) => {
+                new Game({host: invitee, guest: invited,
+                    winner: hostWon ? invitee : invited,
+                    date: new Date()}).save()
+                makeAvailable(invitee)
+                makeAvailable(invited)
+            })
 
-            const game = new GameEngine(inviteeSid, invitedSid, io)
             games[inviteeSid] = game
             game.emitState()
 
             console.log('Game created by ' + invitee)
         }
-        //...
     })
 
     socket.on('start_game', () => {
@@ -164,6 +171,10 @@ io.on('connection', function(socket){
         }
     })
 
+    socket.on('disconnect', () => {
+        const name = getNameBySocketId(socket.id)
+        makeUnavailable(name)
+    })
 })
 
 const sendListUpdate = (socket) => {
@@ -186,14 +197,24 @@ const getGames = () => {
         })
 }
 
-const saveGame = (hostName, guestName, winner) => {
-    const date = new Date()
-    const game = new Game({host: hostName, guest: guestName, winner, date})
-    game.save((err) => {
-        if(err) {
-            console.error(err)
+const getNameBySocketId = (socketId) => {
+    const it = userToSocket.keys()
+    let k: Object = it.next()
+    while(k.value) {
+        if(userToSocket.get(k.value) === socketId) {
+            return k.value
         }
-    })
+        k = it.next()
+    }
+}
+
+const makeAvailable = (user) => {
+    User.findByIdAndUpdate(user, {$set: {available: true}}, (err) => {})
+}
+
+const makeUnavailable = (user) => {
+    console.log(user)
+    User.findByIdAndUpdate(user, {$set: {available: false}}, (err) => {})
 }
 
 module.exports = io
