@@ -177,6 +177,7 @@ export default class GameScreen extends Component {
                 {this.state.opponent} left the game!
             </Dialog>
             <Dialog
+                actions={[action]}
                 open={this.state.gameStatus !== ''}
                 onRequestClose={this.onGameEnd}
                 modal={false}

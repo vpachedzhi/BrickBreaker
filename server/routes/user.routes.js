@@ -82,25 +82,28 @@ router.post('/setSocket', (req, res) => {
 })
 
 router.get('/usersOnline', (req, res) => {
-    User.find({available: true}, (err, users) =>{
-        if(err){
-            res.status(500).send()
-        }
-        else {
-            Game.find({}, (err, games) => {
-                if(err){
-                    res.status(500).send()
-                }
-                else {
-                    res.status(200)
-                        .json(users
-                                .map(({_id}) => ({name: _id, coefficient: calcCoefficient(games, _id)}))
-                                .filter(({name}) => name !== req.session.user._id)
-                        )
-                }
-            })
-        }
-    })
+    if(!req.session.user)
+        res.status(403).send()
+    else
+        User.find({available: true}, (err, users) =>{
+            if(err){
+                res.status(500).send()
+            }
+            else {
+                Game.find({}, (err, games) => {
+                    if(err){
+                        res.status(500).send()
+                    }
+                    else {
+                        res.status(200)
+                            .json(users
+                                    .map(({_id}) => ({name: _id, coefficient: calcCoefficient(games, _id)}))
+                                    .filter(({name}) => name !== req.session.user._id)
+                            )
+                    }
+                })
+            }
+        })
 })
 
 function calcCoefficient(games, playerName) {
