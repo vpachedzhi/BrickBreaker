@@ -28,13 +28,17 @@ export default class Home extends Component {
         searchText: string,
         opponentName: string,
         confirmModalOpen: boolean,
-        invitee: string
+        invitee: string,
+        rating: number,
+        usersOnline: Array<{name: string, coefficient: number}>
     } = {
         searchData: [],
         searchText: '',
         opponentName: '',
         confirmModalOpen: false,
-        invitee: ''
+        invitee: '',
+        rating: 0,
+        usersOnline: []
     }
 
     constructor(){
@@ -76,6 +80,22 @@ export default class Home extends Component {
             store.dispatch({type: 'SET_INFO', payload})
             store.dispatch(push('/game'))
         })
+        if(localStorage.getItem('user')) {
+            axios.get('/game/playerCoefficient', {
+                params: {
+                    //$FlowFixMe
+                    name: JSON.parse(localStorage.getItem('user')).name
+                }
+            })
+                .then(({data}) => {
+                    this.setState({rating: data})
+                })
+
+            axios.get('/user/usersOnline')
+                .then(({data}) => {
+                    this.setState({usersOnline: data})
+                })
+        }
     }
 
     componentWillUnmount() {
@@ -162,7 +182,7 @@ export default class Home extends Component {
                     <h1 className={styles.username}>{JSON.parse(localStorage.getItem('user')).name}</h1>
                 </ToolbarGroup>
                 <ToolbarGroup>
-                    <RatingStars rating={0} size={40}/>
+                    <RatingStars rating={this.state.rating} size={40}/>
                 </ToolbarGroup>
                 <ToolbarGroup>
                     <AutoComplete
@@ -196,11 +216,11 @@ export default class Home extends Component {
             <div className="row center-xs">
                 <div className="col-xs-3">
                     <List style={{height: 700, overflowY: 'scroll'}}>
-                        {Array.from(new Array(50).keys()).map((i:number) => (
+                        {this.state.usersOnline.map(({name, coefficient}: {name: string, coefficient: number}, i:number) => (
                             <ListItem
                                 rightIcon={<ActionDone/>}
-                                primaryText='Some user name'
-                                secondaryText={<RatingStars rating={Math.random()} size={24}/>}
+                                primaryText={name}
+                                secondaryText={<RatingStars rating={coefficient} size={24}/>}
                                 key={i}/>
                         ))}
                     </List>

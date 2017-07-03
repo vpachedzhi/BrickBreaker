@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const userToSocket = require('../userSocketMap')
 const User = require('../dbInitializer')
+const Game = require('../db')
 const io = require('../index')
 
 router.post('/register', (req, res) => {
@@ -90,5 +91,37 @@ router.post('/setSocket', (req, res) => {
         res.status(202).send()
     }
 })
+
+router.get('/usersOnline', (req, res) => {
+    User.find({available: true}, (err, users) =>{
+        if(err){
+            res.status(500).send()
+        }
+        else {
+            Game.find({}, (err, games) => {
+                if(err){
+                    res.status(500).send()
+                }
+                else {
+                    res.status(200)
+                        .json(users
+                                .map(({_id}) => ({name: _id, coefficient: calcCoefficient(games, _id)}))
+                            //.filter(name => name !== req.session.user._id)
+                        )
+                }
+            })
+        }
+    })
+})
+
+function calcCoefficient(games, playerName) {
+    const playersGames =  games.filter(({host, guest}) => playerName === host || playerName === guest)
+    if(playersGames.length === 0){
+        return -1
+    }
+    else return playersGames.reduce((acc, next) => {
+        return acc + (next.winner === playerName ? 1 : 0)
+    }, 0) / playersGames.length
+}
 
 module.exports=router
