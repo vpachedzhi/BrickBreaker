@@ -17,6 +17,8 @@ import NavigationCancel from 'material-ui/svg-icons/navigation/cancel'
 import RefreshIndicator from 'material-ui/RefreshIndicator'
 import ActionDone from 'material-ui/svg-icons/action/done'
 import socket from '../../socket'
+import {List, ListItem} from 'material-ui/List'
+import RatingStars from "../RatingStars/RatingStars"
 
 
 export default class Home extends Component {
@@ -45,9 +47,7 @@ export default class Home extends Component {
 
     componentDidMount() {
 
-        console.log('Home screen mount')
         socket.on('invitation', ({invSocketId, invitee}) => {
-            console.log('Invitation received socketId:  ' + invitee)
             this.setState({confirmModalOpen: true, invitee})
         })
         socket.on('declined', () => this.setState({
@@ -79,7 +79,6 @@ export default class Home extends Component {
     }
 
     componentWillUnmount() {
-        console.log('Home screen died')
         socket.off('invitation')
         socket.off('declined')
         socket.off('accepted')
@@ -158,8 +157,13 @@ export default class Home extends Component {
         //$FlowFixMe
         return localStorage.getItem('user') && <div className={styles.mainContainer}>
             <Toolbar style={{backgroundColor: '#515658'}}>
-                {/*$FlowFixMe*/}
-                <ToolbarGroup firstChild>{JSON.parse(localStorage.getItem('user')).name}</ToolbarGroup>
+                <ToolbarGroup firstChild>
+                    {/*$FlowFixMe*/}
+                    <h1 className={styles.username}>{JSON.parse(localStorage.getItem('user')).name}</h1>
+                </ToolbarGroup>
+                <ToolbarGroup>
+                    <RatingStars rating={0} size={40}/>
+                </ToolbarGroup>
                 <ToolbarGroup>
                     <AutoComplete
                         hintText="Search players"
@@ -178,7 +182,7 @@ export default class Home extends Component {
                             <IconButton touch={true} style={{'padding': '4px'}}>
                                 <Avatar size={40}>
                                     {/*<span >{store.getState().user.name.substr(0,1).toUpperCase()}</span>*/}
-                                    <span>V</span>
+                                    <span>B</span>
                                 </Avatar>
                             </IconButton>
                         }
@@ -189,6 +193,22 @@ export default class Home extends Component {
                     </IconMenu>
                 </ToolbarGroup>
             </Toolbar>
+            <div className="row center-xs">
+                <div className="col-xs-3">
+                    <List style={{height: 700, overflowY: 'scroll'}}>
+                        {Array.from(new Array(50).keys()).map((i:number) => (
+                            <ListItem
+                                rightIcon={<ActionDone/>}
+                                primaryText='Some user name'
+                                secondaryText={<RatingStars rating={Math.random()} size={24}/>}
+                                key={i}/>
+                        ))}
+                    </List>
+                </div>
+            </div>
+
+
+
             <Dialog
                 title={`Please wait ${this.state.opponentName} to confirm.`}
                 open={!!this.state.opponentName}
