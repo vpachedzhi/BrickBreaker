@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const Game = require('../db')
+const Game = require('../models/gameSchema')
 
 router.get('/playerCoefficient', (req, res) => {
     const playerName = req.query['name']

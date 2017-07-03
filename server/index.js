@@ -12,8 +12,9 @@ const url = 'mongodb://localhost:27017/brickBreaker'
 const mongoose = require('mongoose')
 mongoose.connect(url)
 const db = mongoose.connection
-const User = require('./dbInitializer')
-const Game = require('./db')
+const User = require('./models/userSchema')
+const Game = require('./models/gameSchema')
+const dbInit = require('./models/dbInitializer')
 
 const userToSocket = require('./userSocketMap')
 const userRoutes = require('./routes/user.routes')
@@ -25,6 +26,7 @@ db.once('open', function() {
     User.update({}, {available: false}, {multi: true}, (err) => {
         if(err) console.error(err)
     })
+    dbInit()
     app.locals.db = db
 })
 
