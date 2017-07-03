@@ -105,7 +105,7 @@ router.get('/usersOnline', (req, res) => {
                     res.status(200)
                         .json(users
                                 .map(({_id}) => ({name: _id, coefficient: calcCoefficient(games, _id)}))
-                            //.filter(name => name !== req.session.user._id)
+                                .filter(({name}) => name !== req.session.user._id)
                         )
                 }
             })

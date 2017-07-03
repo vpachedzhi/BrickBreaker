@@ -227,7 +227,14 @@ export default class Home extends Component {
                                 rightIcon={<ActionDone/>}
                                 primaryText={name}
                                 secondaryText={<RatingStars rating={coefficient} size={24}/>}
-                                key={i}/>
+                                key={i}
+                                onClick={() => this.setState({opponentName: name}, () => {
+                                    socket.emit('invitation_request', {
+                                        opponent: name,
+                                        //$FlowFixMe
+                                        invitee: JSON.parse(localStorage.getItem('user')).name})
+                                })}
+                            />
                         ))}
                     </List>
                 </div>
