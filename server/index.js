@@ -136,8 +136,14 @@ io.on('connection', function(socket){
 
     socket.on('decline', (userName: string) => {
         const socketId: ?string = userToSocket.get(userName)
+        makeAvailable(userName)
         if(socketId)
             socket.to(socketId).emit('declined')
+    })
+
+    socket.on('cancel', (userName: string) => {
+        console.log(userName + ' declined')
+        makeAvailable(userName)
     })
 
     socket.on('accept', ({invitee, invited}:{invitee:string, invited: string}) => {
@@ -213,7 +219,6 @@ const makeAvailable = (user) => {
 }
 
 const makeUnavailable = (user) => {
-    console.log(user)
     User.findByIdAndUpdate(user, {$set: {available: false}}, (err) => {})
 }
 

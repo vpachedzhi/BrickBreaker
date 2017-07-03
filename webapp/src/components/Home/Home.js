@@ -179,6 +179,15 @@ export default class Home extends Component {
         })
     }
 
+    cancelInvitation = (): void => {
+        //$FlowFixMe
+        socket.emit('cancel', JSON.parse(localStorage.getItem('user')).name)
+        this.setState({
+            opponentName: '',
+            confirmModalOpen: false
+        })
+    }
+
     render(){
         //$FlowFixMe
         return localStorage.getItem('user') && <div className={styles.mainContainer}>
@@ -221,7 +230,7 @@ export default class Home extends Component {
             </Toolbar>
             <div className="row center-xs">
                 <div className="col-xs-3">
-                    <List style={{height: 700, overflowY: 'scroll'}}>
+                    <List style={{height: 700, overflowY: 'auto'}}>
                         {this.state.usersOnline.map(({name, coefficient}: {name: string, coefficient: number}, i:number) => (
                             <ListItem
                                 rightIcon={<ActionDone/>}
@@ -249,7 +258,7 @@ export default class Home extends Component {
                     <FlatButton
                         label="Cancel"
                         icon={<NavigationCancel/>}
-                        onClick={this.declineInvitation}
+                        onClick={this.cancelInvitation}
                     />
                 ]}
                 modal
