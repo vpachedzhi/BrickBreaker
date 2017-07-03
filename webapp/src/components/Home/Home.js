@@ -229,10 +229,10 @@ export default class Home extends Component {
                 </ToolbarGroup>
             </Toolbar>
             <div className="row">
-                <div className="col-xs-3 col-xs-offset-4" style={{marginTop: 30}}>
+                <div className="col-xs-3" style={{marginTop: 30}}>
                     {this.props.children}
                 </div>
-                <div className="col-xs-3">
+                <div className="col-xs-3 col-xs-offset-4">
                     <List style={{height: 700, overflowY: 'auto'}}>
                         {this.state.usersOnline.map(({name, coefficient}: {name: string, coefficient: number}, i:number) => (
                             <ListItem
